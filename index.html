@@ -4,247 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HydroGIS Utility - نظام إدارة شبكات الصرف الصحي</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- مكتبة SheetJS لملفات Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #eef2f5; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-        .app-subtitle { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 20px; font-weight: 600; }
-        
+        h2 { text-align: center; color: #2c3e50; }
         .main-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        
-        #map { flex: 2; height: 450px; min-width: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 2px solid #fff; }
-        
-        .form-panel { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; position: relative; }
+        #map { flex: 2; height: 400px; min-width: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .form-panel { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; transition: border-color 0.3s; }
-        input:focus { border-color: #3498db; outline: none; }
-        
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; color: white; font-size: 16px; cursor: pointer; margin-bottom: 10px; transition: background 0.3s; font-weight: bold; }
-        .btn-location { background-color: #e67e22; }
-        .btn-location:hover { background-color: #d35400; }
+        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
         .btn-save { background-color: #27ae60; }
-        .btn-save:hover { background-color: #219150; }
-        .btn-reset { background-color: #95a5a6; font-size: 14px; padding: 8px;}
-
-        #table-container { margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { text-align: center; padding: 12px; border-bottom: 1px solid #eee; }
-        th { background-color: #f8f9fa; color: #333; }
-        tr:hover { background-color: #f1f1f1; }
-        
-        .action-btn { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin: 0 2px; }
-        .edit-btn { background-color: #f39c12; color: white; }
-        .delete-btn { background-color: #c0392b; color: white; }
-        
-        .btn-export { background-color: #3498db; margin-top: 15px; width: auto; float: left;}
-        .leaflet-popup-content { font-weight: bold; color: #2c3e50; }
-
-        .dev-watermark { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #e0e0e0; text-align: left; font-size: 12px; color: #95a5a6; font-family: monospace; letter-spacing: 0.5px; }
-        .dev-watermark span { color: #2980b9; font-weight: bold; }
+        .btn-export { background-color: #2980b9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #f8f9fa; }
     </style>
 </head>
 <body>
 
     <h2>🌐 HydroGIS Utility</h2>
-    <div class="app-subtitle">نظام الرفع المساحي وإدارة شبكات مطابق الصرف الصحي الميداني</div>
 
     <div class="main-container">
         <div id="map"></div>
-
         <div class="form-panel">
-            <div class="form-group">
-                <button class="btn btn-location" onclick="getLocation()">📍 تحديث إحداثيات موقعي الحالي</button>
-            </div>
-            
-            <input type="hidden" id="lat">
-            <input type="hidden" id="lng">
-
-            <div class="form-group">
-                <label>رقم الصف / النقطة / المطبق:</label>
-                <input type="text" id="pointName" placeholder="مثال: MH-105">
-            </div>
-            <div class="form-group">
-                <label>عمق المطبق (متر):</label>
-                <input type="number" step="0.01" id="manholeDepth" placeholder="مثال: 3.50">
-            </div>
-            <div class="form-group">
-                <label>عمق وش الماسورة (متر):</label>
-                <input type="number" step="0.01" id="pipeCrownDepth" placeholder="مثال: 2.80">
-            </div>
-            <div class="form-group">
-                <label>قطر ماسورة الصرف (مم):</label>
-                <input type="number" id="pipeDiameter" placeholder="مثال: 400">
-            </div>
-            <div class="form-group">
-                <label>ملاحظات:</label>
-                <input type="text" id="notes" placeholder="أية ملاحظات...">
-            </div>
-
-            <div class="form-group">
-                <button id="saveBtn" class="btn btn-save" onclick="saveOrUpdateRecord()">💾 حفظ البيانات في النظام</button>
-                <button id="resetBtn" class="btn btn-reset" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
-            </div>
-
-            <div class="dev-watermark">
-                Designed by: <span>Khaled</span> 💡 GIS Developer
-            </div>
+            <button class="btn" style="background-color:#e67e22;" onclick="getLocation()">📍 تحديث إحداثيات الموقع</button>
+            <input type="hidden" id="lat"><input type="hidden" id="lng">
+            <div class="form-group"><input type="text" id="pointName" placeholder="رقم المطبق (مثال: MH-105)"></div>
+            <div class="form-group"><input type="number" step="0.01" id="manholeDepth" placeholder="عمق المطبق (م)"></div>
+            <div class="form-group"><input type="number" step="0.01" id="pipeCrownDepth" placeholder="عمق الوش (م)"></div>
+            <div class="form-group"><input type="number" id="pipeDiameter" placeholder="القطر (مم)"></div>
+            <div class="form-group"><input type="text" id="notes" placeholder="ملاحظات"></div>
+            <button class="btn btn-save" onclick="saveRecord()">💾 حفظ البيانات</button>
         </div>
     </div>
 
-    <div id="table-container">
-        <h3>📊 السجلات المساحية وقاعدة البيانات المؤقتة</h3>
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>م</th>
-                    <th>رقم المطبق</th>
-                    <th>Lat</th>
-                    <th>Lng</th>
-                    <th>عمق المطبق</th>
-                    <th>عمق الوش</th>
-                    <th>القطر</th>
-                    <th>ملاحظات</th>
-                    <th>تحكم</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="9" style="text-align:center; color: #888;">لا توجد بيانات مسجلة. اضغط على "تحديث إحداثيات موقعي" ثم احفظ النقطة.</td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-export" onclick="exportToExcel()">📥 تصدير البيانات إلى ملف CSV (للإكسيل)</button>
-        <div style="clear: both;"></div>
-    </div>
+    <table id="dataTable">
+        <thead>
+            <tr><th>م</th><th>رقم المطبق</th><th>Lat</th><th>Lng</th><th>العمق</th><th>عمق الوش</th><th>القطر</th><th>ملاحظات</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button class="btn btn-export" onclick="exportToExcel()">📥 تحميل ملف Excel احترافي</button>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([30.0444, 31.2357], 6);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 19,
-            attribution: 'Esri World Imagery'
-        }).addTo(map);
+        let tableData = JSON.parse(localStorage.getItem('hydrogis_data')) || [];
 
-        let currentUserMarker = null;
-        let tableData = [];
-        let editingIndex = -1;
-
-        window.onload = function() {
-            const savedData = localStorage.getItem('hydrogis_manholes_data');
-            if (savedData) {
-                tableData = JSON.parse(savedData);
-                renderTable();
-            }
-        };
-
-        function persistData() {
-            localStorage.setItem('hydrogis_manholes_data', JSON.stringify(tableData));
+        function renderTable() {
+            const tbody = document.querySelector("#dataTable tbody");
+            tbody.innerHTML = tableData.map((item, index) => `<tr>
+                <td>${index+1}</td><td>${item.pointName}</td><td>${item.lat}</td><td>${item.lng}</td>
+                <td>${item.manholeDepth}</td><td>${item.pipeCrownDepth}</td><td>${item.pipeDiameter}</td><td>${item.notes}</td>
+            </tr>`).join('');
         }
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                const locBtn = document.querySelector('.btn-location');
-                locBtn.innerText = 'جاري تحديد الموقع... ⏳';
-                locBtn.disabled = true;
-                navigator.geolocation.getCurrentPosition(showPosition, showError, { enableHighAccuracy: true });
-            } else { alert("عذراً، متصفحك لا يدعم خدمة تحديد الموقع."); }
-        }
-
-        function showPosition(position) {
-            var lat = position.coords.latitude;
-            var lng = position.coords.longitude;
-            document.getElementById('lat').value = lat;
-            document.getElementById('lng').value = lng;
-            const locBtn = document.querySelector('.btn-location');
-            locBtn.innerText = '📍 تم تحديد الإحداثيات بنجاح ✅';
-            setTimeout(() => { locBtn.innerText = '📍 تحديث إحداثيات موقعي الحالي'; locBtn.disabled = false; }, 2000);
-            if (currentUserMarker) map.removeLayer(currentUserMarker);
-            map.setView([lat, lng], 18);
-            currentUserMarker = L.marker([lat, lng]).addTo(map).bindPopup("<b>الموقع الحالي</b>").openPopup();
-        }
-
-        function showError() { alert("تعذر تحديد الموقع."); }
-
-        function saveOrUpdateRecord() {
-            const lat = document.getElementById('lat').value;
-            const lng = document.getElementById('lng').value;
-            const pointName = document.getElementById('pointName').value;
-            if (!lat || !lng || !pointName) { alert("⚠️ يرجى التأكد من تحديد الموقع وإدخال اسم المطبق."); return; }
+        function saveRecord() {
             const record = {
-                id: editingIndex === -1 ? Date.now() : tableData[editingIndex].id,
-                pointName: pointName,
-                latitude: lat,
-                longitude: lng,
+                pointName: document.getElementById('pointName').value,
+                lat: document.getElementById('lat').value,
+                lng: document.getElementById('lng').value,
                 manholeDepth: document.getElementById('manholeDepth').value,
                 pipeCrownDepth: document.getElementById('pipeCrownDepth').value,
                 pipeDiameter: document.getElementById('pipeDiameter').value,
                 notes: document.getElementById('notes').value
             };
-            if (editingIndex === -1) tableData.push(record);
-            else { tableData[editingIndex] = record; resetForm(); }
-            persistData(); renderTable(); clearInputs();
-        }
-
-        function renderTable() {
-            const tbody = document.querySelector("#dataTable tbody");
-            tbody.innerHTML = "";
-            tableData.forEach((item, index) => {
-                const row = `<tr><td>${index + 1}</td><td>${item.pointName}</td><td>${item.latitude}</td><td>${item.longitude}</td><td>${item.manholeDepth}</td><td>${item.pipeCrownDepth}</td><td>${item.pipeDiameter}</td><td>${item.notes}</td><td><button class="action-btn edit-btn" onclick="prepareEdit(${index})">تعديل</button> <button class="action-btn delete-btn" onclick="deleteRecord(${index})">حذف</button></td></tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-        }
-
-        function clearInputs() {
-            document.getElementById('pointName').value = '';
-            document.getElementById('manholeDepth').value = '';
-            document.getElementById('pipeCrownDepth').value = '';
-            document.getElementById('pipeDiameter').value = '';
-            document.getElementById('notes').value = '';
-        }
-
-        function prepareEdit(index) {
-            const item = tableData[index];
-            editingIndex = index;
-            document.getElementById('pointName').value = item.pointName;
-            document.getElementById('lat').value = item.latitude;
-            document.getElementById('lng').value = item.longitude;
-            document.getElementById('manholeDepth').value = item.manholeDepth;
-            document.getElementById('pipeCrownDepth').value = item.pipeCrownDepth;
-            document.getElementById('pipeDiameter').value = item.pipeDiameter;
-            document.getElementById('notes').value = item.notes;
-            document.getElementById('saveBtn').innerText = "✅ حفظ التعديلات";
-            document.getElementById('resetBtn').style.display = 'inline-block';
-        }
-
-        function resetForm() {
-            editingIndex = -1; clearInputs();
-            document.getElementById('saveBtn').innerText = "💾 حفظ البيانات في النظام";
-            document.getElementById('resetBtn').style.display = 'none';
-        }
-
-        function deleteRecord(index) {
-            if (confirm("هل أنت متأكد من الحذف؟")) { tableData.splice(index, 1); persistData(); renderTable(); }
+            tableData.push(record);
+            localStorage.setItem('hydrogis_data', JSON.stringify(tableData));
+            renderTable();
         }
 
         function exportToExcel() {
-            if (tableData.length === 0) { alert("لا توجد بيانات!"); return; }
-            const BOM = "\uFEFF";
-            let csvContent = BOM + "م,رقم المطبق,Lat,Lng,عمق المطبق,عمق الوش,القطر,ملاحظات\n";
-            tableData.forEach((item, index) => {
-                csvContent += [index + 1, item.pointName, item.latitude, item.longitude, item.manholeDepth || 0, item.pipeCrownDepth || 0, item.pipeDiameter || 0, item.notes || ''].join(",") + "\n";
-            });
-            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = "HydroGIS_Data.csv";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            if (tableData.length === 0) return alert("لا توجد بيانات!");
+            // تحويل البيانات لملف إكسيل
+            const ws = XLSX.utils.json_to_sheet(tableData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "البيانات");
+            XLSX.writeFile(wb, "HydroGIS_Report.xlsx");
         }
+
+        function getLocation() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('lat').value = pos.coords.latitude;
+                document.getElementById('lng').value = pos.coords.longitude;
+                alert("تم تحديث الإحداثيات!");
+            });
+        }
+        renderTable();
     </script>
 </body>
 </html>
