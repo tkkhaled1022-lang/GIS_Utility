@@ -565,6 +565,8 @@
         <div class="form-panel">
 
 
+            <!-- GPS BUTTON -->
+
             <button
                 id="locationBtn"
                 class="btn btn-location"
@@ -655,13 +657,16 @@
                 type="hidden"
                 id="lat">
 
+
             <input
                 type="hidden"
                 id="lng">
 
+
             <input
                 type="hidden"
                 id="accuracy">
+
 
             <input
                 type="hidden"
@@ -858,7 +863,9 @@
             </thead>
 
 
-            <tbody></tbody>
+            <tbody>
+
+            </tbody>
 
         </table>
 
@@ -915,61 +922,124 @@
 
 
         /* =====================================================
-           VARIABLES
+           GPS VARIABLES
         ====================================================== */
+
+
+        /*
+           Marker الخاص بالمستخدم
+        */
 
         let currentUserMarker = null;
 
+
+        /*
+           دائرة الدقة
+        */
+
         let accuracyCircle = null;
+
+
+        /*
+           معرف watchPosition
+        */
 
         let gpsWatchId = null;
 
-        let bestPosition = null;
 
-        let gpsReadingCount = 0;
+        /*
+           آخر قراءة وصلت من GPS
+           للعرض
+        */
 
-        let tableData = [];
+        let latestDisplayedPosition = null;
 
-        let editingIndex = -1;
+
+        /*
+           القراءة المرشحة للحفظ
+        */
+
+        let saveCandidatePosition = null;
+
+
+        /*
+           حالة تشغيل GPS
+        */
+
+        let gpsMonitoringActive = false;
+
+
+        /*
+           رقم جلسة GPS
+        */
 
         let gpsSession = 0;
 
-        let gpsTimer = null;
 
-        let firstFixReceived = false;
+        /*
+           هل تم توسيط الخريطة؟
+        */
+
+        let mapCenteredOnce = false;
+
+
+        /*
+           بيانات الجدول
+        */
+
+        let tableData = [];
+
+
+        /*
+           وضع التعديل
+        */
+
+        let editingIndex = -1;
 
 
         /* =====================================================
            GPS SETTINGS
         ====================================================== */
 
+
         /*
-           الحد الأقصى للحفظ
+           أقصى دقة مسموحة للحفظ
         */
 
         const MAX_SAVE_ACCURACY = 15;
 
 
         /*
-           الهدف الأفضل.
-           عند الوصول إلى 10 متر أو أفضل
-           ننهي البحث فورًا.
+           الدقة المستهدفة
         */
 
         const TARGET_ACCURACY = 10;
 
 
         /*
-           الحد الأقصى لجلسة البحث
+           أقصى عمر للقراءة للحفظ
+           5 ثوان
+        */
+
+        const MAX_SAVE_AGE = 5000;
+
+
+        /*
+           لا نعرض قراءات أسوأ من 100 متر
+        */
+
+        const MAX_DISPLAY_ACCURACY = 100;
+
+
+        /*
+           مهلة GPS القصوى
         */
 
         const GPS_TIMEOUT = 5000;
 
 
         /*
-           لا نستخدم قراءة GPS قديمة.
-           مهم جدًا لأن المستخدم ينتقل
-           من مطبق إلى آخر.
+           لا نستخدم قراءة قديمة من Cache
         */
 
         const GPS_MAX_AGE = 0;
@@ -1029,8 +1099,7 @@
 
 
         /* =====================================================
-           START GPS
-           FAST + FRESH POSITION
+           START GPS MONITORING
         ====================================================== */
 
         function startHighAccuracyGPS() {
@@ -1047,14 +1116,27 @@
 
 
             /*
-               إيقاف أي جلسة سابقة
+               إذا كان GPS يعمل بالفعل
+               لا ننشئ مراقبة جديدة
             */
 
-            stopGPS();
+            if (gpsMonitoringActive) {
+
+                updateGPSStatus(
+
+                    "📡 GPS يعمل بالفعل ويتم تحديث الموقع باستمرار",
+
+                    "good"
+
+                );
+
+                return;
+
+            }
 
 
             /*
-               إنشاء جلسة GPS جديدة
+               جلسة GPS جديدة
             */
 
             gpsSession++;
@@ -1063,19 +1145,31 @@
                 gpsSession;
 
 
+            gpsMonitoringActive = true;
+
+
             /*
-               تصفير أفضل قراءة
+               إعادة السماح بتوسيط الخريطة
+               عند بدء جلسة جديدة
             */
 
-            bestPosition = null;
-
-            gpsReadingCount = 0;
-
-            firstFixReceived = false;
+            mapCenteredOnce = false;
 
 
             /*
-               الزر
+               لا نحذف القراءة السابقة مباشرة
+               لكن القراءة القديمة لن تكون صالحة للحفظ
+               بسبب فحص timestamp.
+            */
+
+            saveCandidatePosition = null;
+
+
+            latestDisplayedPosition = null;
+
+
+            /*
+               حالة الزر
             */
 
             const locationBtn =
@@ -1084,29 +1178,26 @@
                 );
 
 
-            locationBtn.disabled = true;
+            locationBtn.disabled =
+                true;
+
 
             locationBtn.innerText =
-                "📡 تحديد الموقع...";
+                "📡 جاري تحديد الموقع...";
 
 
             updateGPSStatus(
 
-                "📡 جاري البحث عن موقع GPS جديد...",
+                "📡 جاري الحصول على موقع GPS حديث...",
 
                 "waiting"
 
             );
 
 
-            /*
-               =================================================
-               FIRST POSITION
-               =================================================
-
-               نحاول الحصول على أول قراءة
-               حديثة وعالية الدقة.
-            */
+            /* =================================================
+               FIRST FIX
+               ================================================= */
 
             navigator.geolocation.getCurrentPosition(
 
@@ -1129,12 +1220,6 @@
 
                 function(error) {
 
-                    console.log(
-                        "Initial GPS:",
-                        error
-                    );
-
-
                     handleGPSError(
                         error
                     );
@@ -1143,25 +1228,23 @@
 
                 {
 
-                    enableHighAccuracy: true,
+                    enableHighAccuracy:
+                        true,
 
-                    timeout: 4500,
+                    timeout:
+                        GPS_TIMEOUT,
 
-                    maximumAge: GPS_MAX_AGE
+                    maximumAge:
+                        GPS_MAX_AGE
 
                 }
 
             );
 
 
-            /*
-               =================================================
-               WATCH POSITION
-               =================================================
-
-               الاستمرار في استقبال القراءات
-               لاختيار أفضل موقع.
-            */
+            /* =================================================
+               CONTINUOUS WATCH
+               ================================================= */
 
             gpsWatchId =
 
@@ -1186,8 +1269,7 @@
 
                     function(error) {
 
-                        console.log(
-                            "GPS Watch:",
+                        handleGPSError(
                             error
                         );
 
@@ -1195,43 +1277,16 @@
 
                     {
 
-                        enableHighAccuracy: true,
+                        enableHighAccuracy:
+                            true,
 
-                        timeout: 4500,
+                        timeout:
+                            GPS_TIMEOUT,
 
-                        maximumAge: GPS_MAX_AGE
+                        maximumAge:
+                            GPS_MAX_AGE
 
                     }
-
-                );
-
-
-            /*
-               =================================================
-               HARD LIMIT
-               =================================================
-
-               مهما حدث لن تتجاوز جلسة البحث
-               5 ثوانٍ.
-            */
-
-            gpsTimer =
-
-                setTimeout(
-
-                    function() {
-
-                        if (
-                            thisSession === gpsSession
-                        ) {
-
-                            finishGPS();
-
-                        }
-
-                    },
-
-                    GPS_TIMEOUT
 
                 );
 
@@ -1240,15 +1295,20 @@
 
         /* =====================================================
            PROCESS GPS POSITION
-
-           اختيار أفضل قراءة حديثة
         ====================================================== */
 
         function processGPSPosition(
             position
         ) {
 
-            gpsReadingCount++;
+            if (
+                !position ||
+                !position.coords
+            ) {
+
+                return;
+
+            }
 
 
             const coords =
@@ -1297,12 +1357,12 @@
             */
 
             if (
-                accuracy > 100
+                accuracy > MAX_DISPLAY_ACCURACY
             ) {
 
                 updateGPSStatus(
 
-                    "📡 GPS يبحث... الدقة الحالية " +
+                    "📡 GPS يعمل — الدقة الحالية " +
                     accuracy.toFixed(1) +
                     " متر",
 
@@ -1317,243 +1377,75 @@
 
             /*
                =================================================
-               أول قراءة صالحة
+               آخر قراءة معروضة
                =================================================
             */
 
-            if (
-                bestPosition === null
-            ) {
-
-                bestPosition =
-                    position;
-
-
-                firstFixReceived = true;
-
-
-                updateMapPosition(
-                    position
-                );
-
-
-                updateGPSInformation(
-                    position
-                );
-
-
-                updateGPSStatus(
-
-                    "📡 تم الحصول على موقع حديث — الدقة " +
-                    accuracy.toFixed(1) +
-                    " متر",
-
-                    accuracy <= MAX_SAVE_ACCURACY
-
-                        ? "good"
-
-                        : "waiting"
-
-                );
-
-
-                /*
-                   لا ننهي عند أول قراءة 15 متر.
-
-                   ننتظر حتى 10 متر إن أمكن
-                   للحفاظ على دقة المكان.
-                */
-
-                if (
-                    accuracy <= TARGET_ACCURACY
-                ) {
-
-                    finishGPS();
-
-                    return;
-
-                }
-
-
-                return;
-
-            }
+            latestDisplayedPosition =
+                position;
 
 
             /*
                =================================================
-               مقارنة القراءة الجديدة
-               بأفضل قراءة سابقة
+               القراءة المرشحة للحفظ
                =================================================
-            */
 
-            const bestAccuracy =
-                Number(
-                    bestPosition.coords.accuracy
-                );
+               لا نعتمد قراءة قديمة.
 
-
-            /*
-               إذا كانت القراءة الجديدة
-               أفضل من السابقة
-            */
-
-            if (
-                accuracy < bestAccuracy
-            ) {
-
-                bestPosition =
-                    position;
-
-
-                updateMapPosition(
-                    position
-                );
-
-
-                updateGPSInformation(
-                    position
-                );
-
-
-                updateGPSStatus(
-
-                    "📡 تحسن الموقع — الدقة " +
-                    accuracy.toFixed(1) +
-                    " متر",
-
-                    accuracy <= MAX_SAVE_ACCURACY
-
-                        ? "good"
-
-                        : "waiting"
-
-                );
-
-
-                /*
-                   الوصول للدقة المستهدفة
-                */
-
-                if (
-                    accuracy <= TARGET_ACCURACY
-                ) {
-
-                    finishGPS();
-
-                    return;
-
-                }
-
-            }
-
-        }
-
-
-        /* =====================================================
-           FINISH GPS
-
-           أقصى مدة = 5 ثوانٍ
-        ====================================================== */
-
-        function finishGPS() {
-
-            stopGPS();
-
-
-            /*
-               إلغاء المؤقت
-            */
-
-            if (
-                gpsTimer !== null
-            ) {
-
-                clearTimeout(
-                    gpsTimer
-                );
-
-                gpsTimer = null;
-
-            }
-
-
-            const locationBtn =
-                document.getElementById(
-                    "locationBtn"
-                );
-
-
-            locationBtn.disabled = false;
-
-
-            /*
-               =================================================
-               لم نحصل على أي قراءة
-               =================================================
-            */
-
-            if (
-                !bestPosition
-            ) {
-
-                locationBtn.innerText =
-                    "📍 إعادة المحاولة";
-
-
-                updateGPSStatus(
-
-                    "❌ لم يتم الحصول على موقع GPS خلال 5 ثوانٍ",
-
-                    "bad"
-
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-               =================================================
-               اعتماد أفضل قراءة
-               =================================================
-            */
-
-            updateMapPosition(
-                bestPosition
-            );
-
-
-            updateGPSInformation(
-                bestPosition
-            );
-
-
-            const accuracy =
-                Number(
-                    bestPosition.coords.accuracy
-                );
-
-
-            /*
-               =================================================
-               الموقع مقبول للحفظ
-               =================================================
+               القراءة الحالية فقط تصبح المرشح الجديد.
             */
 
             if (
                 accuracy <= MAX_SAVE_ACCURACY
             ) {
 
-                locationBtn.innerText =
-                    "✅ تم تحديد الموقع";
+                saveCandidatePosition =
+                    position;
 
+            }
+
+            else {
+
+                /*
+                   القراءة الحالية ضعيفة للحفظ.
+                   لذلك لا نستبدل بها المرشح الجيد.
+
+                   ولكن عملية الحفظ نفسها ستفحص عمر
+                   المرشح مرة أخرى.
+                */
+
+            }
+
+
+            /*
+               تحديث الخريطة
+            */
+
+            updateMapPosition(
+                position
+            );
+
+
+            /*
+               تحديث معلومات GPS
+            */
+
+            updateGPSInformation(
+                position
+            );
+
+
+            /*
+               حالة GPS
+            */
+
+            if (
+                accuracy <= TARGET_ACCURACY
+            ) {
 
                 updateGPSStatus(
 
-                    "✅ الموقع جاهز للحفظ — أفضل دقة: " +
+                    "✅ دقة ممتازة — " +
                     accuracy.toFixed(1) +
                     " متر",
 
@@ -1563,64 +1455,273 @@
 
             }
 
-
-            /*
-               =================================================
-               الموقع موجود لكن دقته غير كافية للحفظ
-               =================================================
-            */
-
-            else {
-
-                locationBtn.innerText =
-                    "⚠️ إعادة تحديد الموقع";
-
+            else if (
+                accuracy <= MAX_SAVE_ACCURACY
+            ) {
 
                 updateGPSStatus(
 
-                    "⚠️ أفضل دقة خلال 5 ثوانٍ: " +
+                    "✅ الموقع صالح للحفظ — " +
                     accuracy.toFixed(1) +
-                    " متر — لا يمكن حفظ النقطة",
+                    " متر",
 
-                    "bad"
+                    "good"
 
                 );
 
             }
+
+            else {
+
+                updateGPSStatus(
+
+                    "📡 GPS يعمل — الدقة " +
+                    accuracy.toFixed(1) +
+                    " متر",
+
+                    "waiting"
+
+                );
+
+            }
+
+
+            /*
+               تفعيل الزر
+            */
+
+            const locationBtn =
+                document.getElementById(
+                    "locationBtn"
+                );
+
+
+            locationBtn.disabled =
+                false;
+
+
+            locationBtn.innerText =
+                "📍 GPS يعمل — تحديث الموقع";
 
         }
 
 
         /* =====================================================
-           STOP GPS
+           CHECK READING AGE
         ====================================================== */
 
-        function stopGPS() {
+        function isGPSReadingFresh(
+            position
+        ) {
 
             if (
-                gpsWatchId !== null
+                !position
             ) {
 
-                navigator.geolocation.clearWatch(
-                    gpsWatchId
-                );
-
-                gpsWatchId = null;
+                return false;
 
             }
 
 
-            if (
-                gpsTimer !== null
-            ) {
-
-                clearTimeout(
-                    gpsTimer
+            const timestamp =
+                Number(
+                    position.timestamp
                 );
 
-                gpsTimer = null;
+
+            if (
+                !isFinite(timestamp)
+            ) {
+
+                return false;
 
             }
+
+
+            const age =
+                Date.now() -
+                timestamp;
+
+
+            /*
+               القراءة يجب أن تكون:
+
+               ليست مستقبلية
+               وعمرها <= 5 ثوان
+            */
+
+            return (
+
+                age >= 0 &&
+
+                age <= MAX_SAVE_AGE
+
+            );
+
+        }
+
+
+        /* =====================================================
+           GET CURRENT SAVE POSITION
+        ====================================================== */
+
+        function getCurrentSavePosition() {
+
+            /*
+               لا يوجد مرشح
+            */
+
+            if (
+                !saveCandidatePosition
+            ) {
+
+                return null;
+
+            }
+
+
+            /*
+               القراءة أصبحت قديمة
+            */
+
+            if (
+                !isGPSReadingFresh(
+                    saveCandidatePosition
+                )
+            ) {
+
+                return null;
+
+            }
+
+
+            const accuracy =
+                Number(
+                    saveCandidatePosition
+                        .coords
+                        .accuracy
+                );
+
+
+            /*
+               الدقة يجب ألا تتجاوز 15 متر
+            */
+
+            if (
+
+                !isFinite(accuracy) ||
+
+                accuracy > MAX_SAVE_ACCURACY
+
+            ) {
+
+                return null;
+
+            }
+
+
+            return saveCandidatePosition;
+
+        }
+
+
+        /* =====================================================
+           VALIDATE GPS BEFORE SAVE
+        ====================================================== */
+
+        function validateGPSForSave() {
+
+            /*
+               الحصول على القراءة الحالية
+            */
+
+            const position =
+                getCurrentSavePosition();
+
+
+            /*
+               لا توجد قراءة صالحة
+            */
+
+            if (!position) {
+
+                alert(
+
+                    "⚠️ لا توجد قراءة GPS حديثة وصالحة للحفظ.\n\n" +
+
+                    "انتظر تحديث GPS جديدًا ثم حاول الحفظ."
+
+                );
+
+                return null;
+
+            }
+
+
+            const accuracy =
+                Number(
+                    position.coords.accuracy
+                );
+
+
+            /*
+               فحص الدقة
+            */
+
+            if (
+                accuracy > MAX_SAVE_ACCURACY
+            ) {
+
+                alert(
+
+                    "⚠️ دقة GPS الحالية " +
+
+                    accuracy.toFixed(1) +
+
+                    " متر.\n\n" +
+
+                    "لا يمكن الحفظ إلا بدقة " +
+
+                    MAX_SAVE_ACCURACY +
+
+                    " متر أو أفضل."
+
+                );
+
+                return null;
+
+            }
+
+
+            /*
+               فحص العمر للمرة الأخيرة
+            */
+
+            const age =
+                Date.now() -
+                Number(
+                    position.timestamp
+                );
+
+
+            if (
+                age > MAX_SAVE_AGE
+            ) {
+
+                alert(
+
+                    "⚠️ قراءة GPS أصبحت أقدم من 5 ثوانٍ.\n\n" +
+
+                    "انتظر قراءة جديدة."
+
+                );
+
+                return null;
+
+            }
+
+
+            return position;
 
         }
 
@@ -1652,7 +1753,7 @@
 
 
             /*
-               إنشاء Marker أول مرة
+               إنشاء Marker
             */
 
             if (
@@ -1669,24 +1770,6 @@
 
                 currentUserMarker.bindPopup(
                     "<b>📍 موقع GPS</b>"
-                );
-
-
-                /*
-                   تحريك الخريطة إلى الموقع
-                   فقط عند أول ظهور للـGPS.
-                */
-
-                map.setView(
-
-                    [lat, lng],
-
-                    19,
-
-                    {
-                        animate: false
-                    }
-
                 );
 
             }
@@ -1765,6 +1848,35 @@
 
             }
 
+
+            /*
+               توسيط الخريطة مرة واحدة فقط
+            */
+
+            if (
+                !mapCenteredOnce
+            ) {
+
+                map.setView(
+
+                    [lat, lng],
+
+                    19,
+
+                    {
+
+                        animate:
+                            false
+
+                    }
+
+                );
+
+
+                mapCenteredOnce = true;
+
+            }
+
         }
 
 
@@ -1803,7 +1915,7 @@
 
 
             /*
-               Hidden values
+               Hidden fields
             */
 
             document.getElementById(
@@ -1837,24 +1949,22 @@
 
 
             /*
-               Visible Latitude
+               Latitude
             */
 
             document.getElementById(
                 'gpsLat'
             ).innerText =
-
                 lat.toFixed(7);
 
 
             /*
-               Visible Longitude
+               Longitude
             */
 
             document.getElementById(
                 'gpsLng'
             ).innerText =
-
                 lng.toFixed(7);
 
 
@@ -1874,7 +1984,8 @@
                 " متر";
 
 
-            accuracyElement.className = "";
+            accuracyElement.className =
+                "";
 
 
             if (
@@ -1940,6 +2051,13 @@
                 document.getElementById(
                     'gpsStatus'
                 );
+
+
+            if (!status) {
+
+                return;
+
+            }
 
 
             status.innerText =
@@ -2036,42 +2154,31 @@
 
             /*
                Position unavailable
+               أو Timeout
             */
 
             if (
-                error.code === 2
-            ) {
 
-                updateGPSStatus(
+                error.code === 2 ||
 
-                    "📡 GPS لم يحصل على إشارة كافية...",
-
-                    "waiting"
-
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-               Timeout
-            */
-
-            if (
                 error.code === 3
+
             ) {
+
+                /*
+                   لا نوقف GPS.
+
+                   watchPosition سيستمر
+                   في محاولة الحصول على موقع.
+                */
 
                 updateGPSStatus(
 
-                    "📡 GPS ما زال يبحث عن الموقع...",
+                    "📡 GPS ما زال يبحث عن موقع حديث...",
 
                     "waiting"
 
                 );
-
 
                 return;
 
@@ -2086,34 +2193,49 @@
 
         function saveOrUpdateRecord() {
 
+            /*
+               الحصول على أحدث قراءة صالحة
+            */
+
+            const position =
+                validateGPSForSave();
+
+
+            /*
+               لا توجد قراءة صالحة
+            */
+
+            if (!position) {
+
+                return;
+
+            }
+
+
+            /*
+               الإحداثيات من نفس قراءة GPS
+            */
+
             const lat =
                 Number(
-                    document.getElementById(
-                        'lat'
-                    ).value
+                    position.coords.latitude
                 );
 
 
             const lng =
                 Number(
-                    document.getElementById(
-                        'lng'
-                    ).value
+                    position.coords.longitude
                 );
 
 
             const accuracy =
                 Number(
-                    document.getElementById(
-                        'accuracy'
-                    ).value
+                    position.coords.accuracy
                 );
 
 
-            const altitudeText =
-                document.getElementById(
-                    'altitude'
-                ).value;
+            const altitude =
+                position.coords.altitude;
 
 
             const pointName =
@@ -2123,65 +2245,10 @@
 
 
             /*
-               GPS check
+               التحقق من اسم المطبق
             */
 
-            if (
-
-                !isFinite(lat) ||
-
-                !isFinite(lng) ||
-
-                !isFinite(accuracy)
-
-            ) {
-
-                alert(
-                    "⚠️ يجب تحديد الموقع GPS أولًا."
-                );
-
-                return;
-
-            }
-
-
-            /*
-               Accuracy check
-            */
-
-            if (
-                accuracy >
-                MAX_SAVE_ACCURACY
-            ) {
-
-                alert(
-
-                    "⚠️ دقة GPS الحالية " +
-
-                    accuracy.toFixed(1) +
-
-                    " متر.\n\n" +
-
-                    "لا يمكن حفظ النقطة حتى تصبح الدقة " +
-
-                    MAX_SAVE_ACCURACY +
-
-                    " متر أو أفضل."
-
-                );
-
-                return;
-
-            }
-
-
-            /*
-               Point name
-            */
-
-            if (
-                !pointName
-            ) {
+            if (!pointName) {
 
                 alert(
                     "⚠️ يرجى إدخال رقم المطبق."
@@ -2201,7 +2268,7 @@
 
 
             /*
-               Record
+               إنشاء السجل
             */
 
             const record = {
@@ -2235,10 +2302,11 @@
 
                 altitude:
 
-                    altitudeText
+                    altitude !== null &&
+                    altitude !== undefined
 
                         ? Number(
-                            altitudeText
+                            altitude
                           )
 
                         : null,
@@ -2309,16 +2377,377 @@
             }
 
 
+            /*
+               حفظ البيانات
+            */
+
             persistData();
 
             renderTable();
 
-            resetForm();
+
+            /*
+               مهم:
+
+               بعد الحفظ لا نستعمل resetForm()
+               لأنه سيوقف GPS.
+
+               نستخدم clearInputs فقط.
+            */
+
+            editingIndex = -1;
+
+            clearInputs();
+
+
+            document.getElementById(
+                'saveBtn'
+            ).innerText =
+                "💾 حفظ البيانات";
+
+
+            document.getElementById(
+                'resetBtn'
+            ).style.display =
+                "none";
+
+
+            /*
+               GPS مستمر للمطبق التالي
+            */
+
+            updateGPSStatus(
+
+                "✅ تم حفظ النقطة — GPS مستمر للمطبق التالي",
+
+                "good"
+
+            );
 
 
             alert(
                 "✅ تم حفظ النقطة بنجاح."
             );
+
+        }
+
+
+        /* =====================================================
+           CLEAR INPUTS
+        ====================================================== */
+
+        function clearInputs() {
+
+            document.getElementById(
+                'pointName'
+            ).value = "";
+
+
+            document.getElementById(
+                'manholeDepth'
+            ).value = "";
+
+
+            document.getElementById(
+                'pipeCrownDepth'
+            ).value = "";
+
+
+            document.getElementById(
+                'pipeDiameter'
+            ).value = "";
+
+
+            document.getElementById(
+                'notes'
+            ).value = "";
+
+        }
+
+
+        /* =====================================================
+           RESET FORM
+        ====================================================== */
+
+        function resetForm() {
+
+            /*
+               إيقاف GPS عند Reset
+            */
+
+            stopGPS();
+
+
+            editingIndex = -1;
+
+
+            clearInputs();
+
+
+            document.getElementById(
+                'saveBtn'
+            ).innerText =
+                "💾 حفظ البيانات";
+
+
+            document.getElementById(
+                'resetBtn'
+            ).style.display =
+                "none";
+
+
+            updateGPSStatus(
+
+                "⏹️ تم إيقاف مراقبة GPS",
+
+                "waiting"
+
+            );
+
+        }
+
+
+        /* =====================================================
+           STOP GPS
+        ====================================================== */
+
+        function stopGPS() {
+
+            /*
+               إيقاف watchPosition
+            */
+
+            if (
+                gpsWatchId !== null
+            ) {
+
+                navigator.geolocation.clearWatch(
+                    gpsWatchId
+                );
+
+                gpsWatchId = null;
+
+            }
+
+
+            /*
+               إبطال الجلسة الحالية
+            */
+
+            gpsSession++;
+
+
+            gpsMonitoringActive =
+                false;
+
+
+            /*
+               القراءة الحالية لا تصلح للحفظ
+               بعد إيقاف المراقبة
+            */
+
+            saveCandidatePosition =
+                null;
+
+        }
+
+
+        /* =====================================================
+           PREPARE EDIT
+        ====================================================== */
+
+        function prepareEdit(
+            index
+        ) {
+
+            const item =
+                tableData[index];
+
+
+            editingIndex =
+                index;
+
+
+            document.getElementById(
+                'pointName'
+            ).value =
+                item.pointName || "";
+
+
+            document.getElementById(
+                'lat'
+            ).value =
+                item.latitude;
+
+
+            document.getElementById(
+                'lng'
+            ).value =
+                item.longitude;
+
+
+            document.getElementById(
+                'accuracy'
+            ).value =
+                item.accuracy;
+
+
+            document.getElementById(
+                'altitude'
+            ).value =
+                item.altitude || "";
+
+
+            document.getElementById(
+                'gpsLat'
+            ).innerText =
+
+                Number(
+                    item.latitude
+                ).toFixed(7);
+
+
+            document.getElementById(
+                'gpsLng'
+            ).innerText =
+
+                Number(
+                    item.longitude
+                ).toFixed(7);
+
+
+            document.getElementById(
+                'gpsAccuracy'
+            ).innerText =
+
+                Number(
+                    item.accuracy
+                ).toFixed(1) +
+                " متر";
+
+
+            document.getElementById(
+                'gpsAltitude'
+            ).innerText =
+
+                item.altitude !== null &&
+                item.altitude !== undefined
+
+                    ? Number(
+                        item.altitude
+                      ).toFixed(2) +
+                      " m"
+
+                    : "غير متاح";
+
+
+            document.getElementById(
+                'manholeDepth'
+            ).value =
+                item.manholeDepth || "";
+
+
+            document.getElementById(
+                'pipeCrownDepth'
+            ).value =
+                item.pipeCrownDepth || "";
+
+
+            document.getElementById(
+                'pipeDiameter'
+            ).value =
+                item.pipeDiameter || "";
+
+
+            document.getElementById(
+                'notes'
+            ).value =
+                item.notes || "";
+
+
+            /*
+               عرض الموقع المسجل
+            */
+
+            const position = {
+
+                coords: {
+
+                    latitude:
+                        Number(
+                            item.latitude
+                        ),
+
+                    longitude:
+                        Number(
+                            item.longitude
+                        ),
+
+                    accuracy:
+                        Number(
+                            item.accuracy || 0
+                        )
+
+                }
+
+            };
+
+
+            updateMapPosition(
+                position
+            );
+
+
+            document.getElementById(
+                'saveBtn'
+            ).innerText =
+                "✅ حفظ التعديلات";
+
+
+            document.getElementById(
+                'resetBtn'
+            ).style.display =
+                "block";
+
+
+            window.scrollTo(
+                0,
+                0
+            );
+
+        }
+
+
+        /* =====================================================
+           DELETE RECORD
+        ====================================================== */
+
+        function deleteRecord(
+            index
+        ) {
+
+            if (
+
+                !confirm(
+                    "⚠️ هل أنت متأكد من حذف هذه النقطة؟"
+                )
+
+            ) {
+
+                return;
+
+            }
+
+
+            tableData.splice(
+                index,
+                1
+            );
+
+
+            persistData();
+
+            renderTable();
 
         }
 
@@ -2545,266 +2974,7 @@
 
 
         /* =====================================================
-           CLEAR INPUTS
-        ====================================================== */
-
-        function clearInputs() {
-
-            document.getElementById(
-                'pointName'
-            ).value = "";
-
-
-            document.getElementById(
-                'manholeDepth'
-            ).value = "";
-
-
-            document.getElementById(
-                'pipeCrownDepth'
-            ).value = "";
-
-
-            document.getElementById(
-                'pipeDiameter'
-            ).value = "";
-
-
-            document.getElementById(
-                'notes'
-            ).value = "";
-
-        }
-
-
-        /* =====================================================
-           PREPARE EDIT
-        ====================================================== */
-
-        function prepareEdit(
-            index
-        ) {
-
-            const item =
-                tableData[index];
-
-
-            editingIndex =
-                index;
-
-
-            document.getElementById(
-                'pointName'
-            ).value =
-                item.pointName || "";
-
-
-            document.getElementById(
-                'lat'
-            ).value =
-                item.latitude;
-
-
-            document.getElementById(
-                'lng'
-            ).value =
-                item.longitude;
-
-
-            document.getElementById(
-                'accuracy'
-            ).value =
-                item.accuracy;
-
-
-            document.getElementById(
-                'altitude'
-            ).value =
-                item.altitude || "";
-
-
-            document.getElementById(
-                'gpsLat'
-            ).innerText =
-
-                Number(
-                    item.latitude
-                ).toFixed(7);
-
-
-            document.getElementById(
-                'gpsLng'
-            ).innerText =
-
-                Number(
-                    item.longitude
-                ).toFixed(7);
-
-
-            document.getElementById(
-                'gpsAccuracy'
-            ).innerText =
-
-                Number(
-                    item.accuracy
-                ).toFixed(1) +
-                " متر";
-
-
-            document.getElementById(
-                'gpsAltitude'
-            ).innerText =
-
-                item.altitude !== null &&
-                item.altitude !== undefined
-
-                    ? Number(
-                        item.altitude
-                      ).toFixed(2) +
-                      " m"
-
-                    : "غير متاح";
-
-
-            document.getElementById(
-                'manholeDepth'
-            ).value =
-                item.manholeDepth || "";
-
-
-            document.getElementById(
-                'pipeCrownDepth'
-            ).value =
-                item.pipeCrownDepth || "";
-
-
-            document.getElementById(
-                'pipeDiameter'
-            ).value =
-                item.pipeDiameter || "";
-
-
-            document.getElementById(
-                'notes'
-            ).value =
-                item.notes || "";
-
-
-            /*
-               عرض الموقع القديم
-            */
-
-            const position = {
-
-                coords: {
-
-                    latitude:
-                        Number(
-                            item.latitude
-                        ),
-
-                    longitude:
-                        Number(
-                            item.longitude
-                        ),
-
-                    accuracy:
-                        Number(
-                            item.accuracy || 0
-                        )
-
-                }
-
-            };
-
-
-            updateMapPosition(
-                position
-            );
-
-
-            document.getElementById(
-                'saveBtn'
-            ).innerText =
-                "✅ حفظ التعديلات";
-
-
-            document.getElementById(
-                'resetBtn'
-            ).style.display =
-                "block";
-
-
-            window.scrollTo(
-                0,
-                0
-            );
-
-        }
-
-
-        /* =====================================================
-           RESET FORM
-        ====================================================== */
-
-        function resetForm() {
-
-            editingIndex = -1;
-
-
-            clearInputs();
-
-
-            document.getElementById(
-                'saveBtn'
-            ).innerText =
-                "💾 حفظ البيانات";
-
-
-            document.getElementById(
-                'resetBtn'
-            ).style.display =
-                "none";
-
-        }
-
-
-        /* =====================================================
-           DELETE
-        ====================================================== */
-
-        function deleteRecord(
-            index
-        ) {
-
-            if (
-
-                !confirm(
-                    "⚠️ هل أنت متأكد من حذف هذه النقطة؟"
-                )
-
-            ) {
-
-                return;
-
-            }
-
-
-            tableData.splice(
-                index,
-                1
-            );
-
-
-            persistData();
-
-            renderTable();
-
-        }
-
-
-        /* =====================================================
-           CREATE EXCEL
+           CREATE EXCEL WORKBOOK
         ====================================================== */
 
         function createExcelWorkbook() {
@@ -2891,9 +3061,13 @@
 
 
             XLSX.utils.book_append_sheet(
+
                 wb,
+
                 ws,
-                "Manholes"
+
+                "Survey Data"
+
             );
 
 
@@ -2903,7 +3077,7 @@
 
 
         /* =====================================================
-           EXPORT EXCEL
+           EXPORT TO EXCEL
         ====================================================== */
 
         function exportToExcel() {
@@ -2934,7 +3108,7 @@
 
             const fileName =
 
-                "HydroGIS_Manholes_" +
+                "HydroGIS_Survey_" +
 
                 new Date()
                     .toISOString()
@@ -2948,15 +3122,6 @@
                 fileName
             );
 
-
-            updateGPSStatus(
-
-                "📊 تم إنشاء ملف Excel بنجاح",
-
-                "good"
-
-            );
-
         }
 
 
@@ -2967,44 +3132,81 @@
         function openDownloadManager() {
 
             /*
-               محاولة فتح صفحة التنزيلات في المتصفح
+               WebToNative قد يوفر مدير الملفات
+               حسب بيئة التطبيق.
+
+               إذا لم يكن متاحًا نوضح للمستخدم.
             */
 
             try {
 
-                window.open(
-                    "about:downloads",
-                    "_blank"
-                );
+                if (
+                    window.WebToNative
+                ) {
+
+                    if (
+                        typeof
+                        window.WebToNative.openDownloadManager
+                        === "function"
+                    ) {
+
+                        window.WebToNative
+                            .openDownloadManager();
+
+                        return;
+
+                    }
+
+                }
 
             }
 
             catch (error) {
 
-                alert(
-
-                    "📂 افتح تطبيق Downloads / التنزيلات في الهاتف لرؤية الملفات."
-
+                console.error(
+                    error
                 );
 
             }
+
+
+            alert(
+
+                "📂 تم فتح عملية التنزيل من خلال المتصفح.\n\n" +
+
+                "يمكنك العثور على ملف Excel في مجلد التنزيلات Downloads."
+
+            );
 
         }
 
 
         /* =====================================================
-           MAP RESIZE FIX
+           STOP GPS WHEN PAGE CLOSES
         ====================================================== */
 
-        setTimeout(
+        window.addEventListener(
+
+            "pagehide",
 
             function() {
 
-                map.invalidateSize();
+                stopGPS();
 
-            },
+            }
 
-            500
+        );
+
+
+        window.addEventListener(
+
+            "beforeunload",
+
+            function() {
+
+                stopGPS();
+
+            }
 
         );
 
