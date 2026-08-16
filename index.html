@@ -1,105 +1,333 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HydroGIS Utility - الرفع المساحي المطور</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/webtonative@1.0.0/webtonative.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; margin: 0; padding: 15px; background: #eef2f5; color: #333; }
-        h2 { text-align: center; color: #2c3e50; margin: 5px 0; }
-        .main-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        #map { flex: 2; height: 400px; min-width: 300px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid white; }
-        .form-panel { flex: 1; background: white; padding: 18px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.12); max-width: 420px; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
-        input { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; }
-        .btn { width: 100%; padding: 13px; border: none; border-radius: 5px; color: white; font-size: 16px; cursor: pointer; margin-bottom: 9px; font-weight: bold; }
-        .btn-location { background: #e67e22; }
-        .btn-save { background: #27ae60; }
-        .btn-export { background: #3498db; }
-        .gps-panel { background: #f8f9fa; border-radius: 7px; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; }
-        .status-box { text-align: center; padding: 9px; margin-top: 8px; border-radius: 5px; font-size: 13px; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HydroGIS Utility v2 - الرفع المساحي لشبكات الصرف</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#eef2f5;--card:#fff;--text:#263746;--muted:#74808b;--orange:#ed7d16;--green:#21a65a;--blue:#2685d8;--purple:#8848b7;--red:#d64545;--line:#dce3e8}
+body{margin:0;padding:14px;background:var(--bg);font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:var(--text)}
+.app{max-width:1500px;margin:auto}
+h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center;color:var(--muted);font-weight:600;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(330px,420px);gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(0,0,0,.08)}
+.map-card{padding:8px}.map-wrap{position:relative}#map{height:590px;border-radius:10px;overflow:hidden}
+.map-status{position:absolute;z-index:500;top:12px;left:50%;transform:translateX(-50%);background:#fff;padding:9px 18px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.16);font-weight:700;display:none;white-space:nowrap}
+.panel{padding:15px}.panel h2{font-size:20px;margin:0 0 12px;color:var(--blue)}
+.form-group{margin-bottom:10px}label{display:block;font-weight:700;font-size:13px;margin-bottom:5px;color:#4d5962}input,select{width:100%;padding:11px;border:1px solid #cfd8df;border-radius:8px;font-size:15px;background:#fff}input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(38,133,216,.10)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{width:100%;border:0;border-radius:8px;padding:12px 10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px}.btn:disabled{opacity:.55;cursor:not-allowed}.orange{background:var(--orange)}.green{background:var(--green)}.blue{background:var(--blue)}.purple{background:var(--purple)}.gray{background:#7b8790}.red{background:var(--red)}
+.gps{background:#f8fafb;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:12px}.gps-title{font-weight:800;color:#334653;margin-bottom:6px}.gps-row{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px solid #e8edf0;font-size:13px}.gps-row:last-child{border-bottom:0}.value{font-weight:800;direction:ltr}.status{margin-top:7px;padding:8px;border-radius:7px;text-align:center;font-size:13px;font-weight:800}.waiting{background:#fff4d7;color:#856404}.good{background:#dff4e5;color:#176536}.bad{background:#fbe0e0;color:#8d2222}.info{background:#e7f2ff;color:#145d9d}
+.elev{border:1px solid #bfe1c9;background:#f4fbf6;border-radius:10px;padding:10px;margin-bottom:12px}.elev strong{font-size:22px;color:#188b4b}.small{font-size:11px;color:var(--muted);line-height:1.5}
+.section-title{font-size:18px;font-weight:900;margin:0 0 10px;color:#2578c4}.table-card{margin-top:14px;padding:14px;overflow:hidden}.table-scroll{overflow:auto}table{width:100%;min-width:1250px;border-collapse:collapse;font-size:12px}th,td{padding:9px 7px;border-bottom:1px solid #e7ecef;text-align:center;white-space:nowrap}th{background:#f2f6f9;color:#344652;position:sticky;top:0;z-index:1}tr:hover{background:#f8fbfd}.mini{padding:5px 8px;border:0;border-radius:5px;color:#fff;cursor:pointer;font-size:11px;font-weight:700;margin:1px}.edit{background:#e49b18}.del{background:#c73e3e}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat span{font-size:12px;color:var(--muted)}
+.footer{margin-top:12px;background:#fff9e9;border:1px solid #f0d99a;border-radius:10px;padding:10px;font-size:12px;line-height:1.7;color:#6b5a24}.settings{margin-top:10px}.settings summary{cursor:pointer;font-weight:800;color:#5b6770}.hidden{display:none}
+.leaflet-control-layers{direction:ltr}.leaflet-popup-content{direction:rtl;text-align:right}
+@media(max-width:900px){body{padding:8px}.grid{grid-template-columns:1fr}.panel{order:2}#map{height:430px}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:21px}.subtitle{font-size:12px}.row2{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
+<div class="app">
+<h1>🌐 HydroGIS Utility — الرفع المساحي لشبكات الصرف</h1>
+<div class="subtitle">تسجيل المواقع باستخدام GPS • استخراج ارتفاع سطح الأرض • حساب مناسيب الماسورة • تصدير Excel</div>
 
-    <h2>🌐 HydroGIS Utility</h2>
-    <div class="main-container">
-        <div id="map"></div>
-        <div class="form-panel">
-            <button id="locationBtn" class="btn btn-location" onclick="startHighAccuracyGPS()">📍 تحديد موقعي (سريع)</button>
-            <div class="gps-panel">
-                <div class="gps-row">Lat: <strong id="gpsLat">---</strong> | Lng: <strong id="gpsLng">---</strong></div>
-                <div class="gps-row">الدقة: <strong id="gpsAccuracy">---</strong> متر</div>
-                <div id="gpsStatus" class="status-box">اضغط لتحديد الموقع</div>
-            </div>
-            
-            <input type="hidden" id="lat"><input type="hidden" id="lng"><input type="hidden" id="accuracy">
-            
-            <div class="form-group"><label>رقم المطبق:</label><input type="text" id="pointName"></div>
-            <div class="form-group"><label>عمق المطبق (م):</label><input type="number" step="0.01" id="manholeDepth"></div>
-            <button id="saveBtn" class="btn btn-save" onclick="saveOrUpdateRecord()">💾 حفظ البيانات</button>
-            <button class="btn btn-export" onclick="exportToExcel()">📊 تصدير Excel</button>
-        </div>
+<div class="grid">
+<section class="card map-card">
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div id="mapStatus" class="map-status">📡 جاري تحديد الموقع...</div>
+  </div>
+  <div class="gps" style="margin-top:10px">
+    <div class="gps-title">📡 حالة GPS الحالية</div>
+    <div class="gps-row"><span>Latitude</span><strong id="gpsLat" class="value">---</strong></div>
+    <div class="gps-row"><span>Longitude</span><strong id="gpsLng" class="value">---</strong></div>
+    <div class="gps-row"><span>دقة GPS</span><strong id="gpsAccuracy" class="value">---</strong></div>
+    <div class="gps-row"><span>ارتفاع GPS</span><strong id="gpsAltitude" class="value">---</strong></div>
+    <div class="gps-row"><span>ارتفاع سطح الأرض DEM</span><strong id="gpsGround" class="value">---</strong></div>
+    <div id="gpsStatus" class="status waiting">لم يتم تحديد الموقع بعد</div>
+  </div>
+</section>
+
+<aside class="card panel">
+  <h2>📍 بيانات النقطة الجديدة</h2>
+  <button id="locationBtn" class="btn orange" onclick="startGPS()">📍 تحديد موقعي بدقة</button>
+
+  <div class="elev" style="margin-top:10px">
+    <div>🏔️ ارتفاع سطح الأرض</div>
+    <strong id="groundElevation">---</strong> <span>م</span>
+    <div id="elevationSource" class="small">سيتم الحصول عليه من DEM بدقة مكانية 90م تقريبًا.</div>
+  </div>
+
+  <div class="form-group"><label>رقم الصف / النقطة / المطبق *</label><input id="pointName" placeholder="مثال: MH-105"></div>
+  <div class="form-group"><label>نوع العنصر</label><select id="elementType"><option value="مطبق صرف صحي">مطبق صرف صحي</option><option value="غرفة تفتيش">غرفة تفتيش</option><option value="نقطة رفع مساحي">نقطة رفع مساحي</option><option value="بداية ماسورة">بداية ماسورة</option><option value="نهاية ماسورة">نهاية ماسورة</option><option value="أخرى">أخرى</option></select></div>
+  <div class="row2">
+    <div class="form-group"><label>عمق المطبق (م)</label><input id="manholeDepth" type="number" step="0.01" placeholder="3.50"></div>
+    <div class="form-group"><label>عمق وش الماسورة (م)</label><input id="pipeCrownDepth" type="number" step="0.01" placeholder="2.80"></div>
+  </div>
+  <div class="row2">
+    <div class="form-group"><label>قطر الماسورة (مم)</label><input id="pipeDiameter" type="number" step="1" placeholder="600"></div>
+    <div class="form-group"><label>اتجاه الخط</label><select id="flowDirection"><option value="غير محدد">غير محدد</option><option value="داخل المطبق">داخل المطبق</option><option value="خارج المطبق">خارج المطبق</option></select></div>
+  </div>
+  <div class="row2">
+    <div class="form-group"><label>منسوب الغطاء / سطح الأرض (م)</label><input id="coverElevation" type="number" step="0.01" placeholder="يُحسب تلقائيًا" readonly></div>
+    <div class="form-group"><label>منسوب وش الماسورة (م)</label><input id="crownElevation" type="number" step="0.01" placeholder="يُحسب تلقائيًا" readonly></div>
+  </div>
+  <div class="row2">
+    <div class="form-group"><label>منسوب قاع الماسورة Invert (م)</label><input id="invertElevation" type="number" step="0.01" placeholder="يُحسب تلقائيًا" readonly></div>
+    <div class="form-group"><label>ملاحظات</label><input id="notes" placeholder="أية ملاحظات..."></div>
+  </div>
+
+  <button class="btn green" id="saveBtn" onclick="saveRecord()">💾 حفظ النقطة</button>
+  <button class="btn gray hidden" id="cancelBtn" onclick="resetForm()">↩️ إلغاء التعديل</button>
+  <button class="btn blue" onclick="exportToExcel()">📊 تصدير Excel</button>
+  <button class="btn purple" onclick="downloadJSON()">📂 حفظ نسخة JSON احتياطية</button>
+  <button class="btn red" onclick="clearAllData()">🗑️ حذف جميع السجلات</button>
+
+  <details class="settings">
+    <summary>⚙️ إعدادات التطبيق</summary>
+    <div class="small" style="margin-top:8px">
+      <b>نظام الإحداثيات:</b> WGS84 / EPSG:4326<br>
+      <b>قاعدة الارتفاع:</b> ارتفاع سطح الأرض من Copernicus DEM GLO-90 عبر Open-Meteo.<br>
+      <b>شرط الحفظ:</b> دقة GPS ≤ 15 م وقراءة حديثة ≤ 5 ثوانٍ.
     </div>
+  </details>
+  <div class="small" style="margin-top:10px;text-align:center">Designed by <b>Khaled — GIS Developer</b></div>
+</aside>
+</div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([30.0444, 31.2357], 10);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 20}).addTo(map);
+<section class="card table-card">
+  <div class="section-title">📊 النقاط المسجلة (<span id="count">0</span>)</div>
+  <div class="table-scroll">
+  <table id="dataTable">
+    <thead><tr>
+      <th>#</th><th>رقم النقطة</th><th>النوع</th><th>Latitude</th><th>Longitude</th><th>دقة GPS</th><th>ارتفاع GPS</th><th>سطح الأرض DEM</th><th>عمق المطبق</th><th>عمق الوش</th><th>القطر</th><th>منسوب الوش</th><th>Invert</th><th>التاريخ والوقت</th><th>ملاحظات</th><th>إجراءات</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+  </div>
+</section>
 
-        let tableData = JSON.parse(localStorage.getItem('hydrogis_manholes_data')) || [];
-        let latestPosition = null;
+<div class="stats">
+  <div class="stat"><b id="sCount">0</b><span>إجمالي النقاط</span></div>
+  <div class="stat"><b id="sAcc">--</b><span>متوسط دقة GPS (م)</span></div>
+  <div class="stat"><b id="sElev">--</b><span>متوسط سطح الأرض (م)</span></div>
+  <div class="stat"><b id="sMinInv">--</b><span>أقل Invert (م)</span></div>
+  <div class="stat"><b id="sMaxInv">--</b><span>أعلى Invert (م)</span></div>
+</div>
 
-        function startHighAccuracyGPS() {
-            const btn = document.getElementById("locationBtn");
-            btn.innerText = "جاري البحث...";
-            
-            navigator.geolocation.watchPosition(pos => {
-                latestPosition = pos;
-                document.getElementById("gpsLat").innerText = pos.coords.latitude.toFixed(6);
-                document.getElementById("gpsLng").innerText = pos.coords.longitude.toFixed(6);
-                document.getElementById("gpsAccuracy").innerText = pos.coords.accuracy.toFixed(1);
-                document.getElementById("gpsStatus").innerText = "✅ GPS متصل";
-                document.getElementById("gpsStatus").style.background = "#d4edda";
-                btn.innerText = "📍 تحديث الموقع";
-            }, err => {
-                alert("خطأ في GPS: " + err.message);
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-        }
+<div class="footer">⚠️ <b>ملاحظة مساحية مهمة:</b> ارتفاع DEM هنا قيمة تضاريسية مرجعية من نموذج رقمي للارتفاعات بدقة 90م تقريبًا، وليس منسوبًا مساحيًا هندسيًا دقيقًا. لأعمال التنفيذ والشبكات ذات الدقة العالية يُفضّل استخدام Benchmarks / GNSS RTK / Total Station وربطها بالمرجع الرأسي المعتمد للمشروع.</div>
+</div>
 
-        function saveOrUpdateRecord() {
-            // نظام مرونة الحفظ: إذا وجدت قراءة استخدمها، وإلا لا تحفظ
-            if (!latestPosition) return alert("⚠️ لم يتم تحديد الموقع بعد، يرجى الانتظار");
+<script>
+'use strict';
 
-            // تنبيه عند الدقة الضعيفة بدلاً من منع الحفظ
-            if (latestPosition.coords.accuracy > 30) {
-                if (!confirm("⚠️ دقة الموقع ضعيفة (" + latestPosition.coords.accuracy.toFixed(1) + "م). هل تريد الحفظ؟")) return;
-            }
+const MAX_SAVE_ACCURACY = 15;
+const MAX_DISPLAY_ACCURACY = 100;
+const MAX_SAVE_AGE = 5000;
+const QUICK_TIMEOUT = 8000;
+const HIGH_TIMEOUT = 12000;
+const ELEVATION_MIN_INTERVAL = 10000;
+const STORAGE_KEY = 'hydrogis_manholes_data_v2';
 
-            const record = {
-                pointName: document.getElementById('pointName').value,
-                lat: latestPosition.coords.latitude,
-                lng: latestPosition.coords.longitude,
-                manholeDepth: document.getElementById('manholeDepth').value
-            };
-            
-            tableData.push(record);
-            localStorage.setItem('hydrogis_manholes_data', JSON.stringify(tableData));
-            alert("تم الحفظ!");
-        }
+let map, userMarker=null, accuracyCircle=null, gpsWatchId=null;
+let gpsActive=false, gpsSession=0, firstFix=false;
+let latestPosition=null, saveCandidatePosition=null;
+let groundElevation=null, elevationRequestInProgress=false, lastElevationRequest=0, lastElevationKey='';
+let tableData=[]; let editingIndex=-1;
 
-        function exportToExcel() {
-            if (tableData.length === 0) return alert("لا توجد بيانات!");
-            const ws = XLSX.utils.json_to_sheet(tableData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "البيانات");
-            XLSX.writeFile(wb, "HydroGIS_Report.xlsx");
-        }
-    </script>
+function $(id){return document.getElementById(id)}
+function num(v){const n=Number(v);return Number.isFinite(n)?n:null}
+function fmt(v,d=2){return v===null||v===undefined||!Number.isFinite(Number(v))?'--':Number(v).toFixed(d)}
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+function initMap(){
+  map=L.map('map',{zoomControl:true}).setView([30.0444,31.2357],13);
+  const imagery=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles © Esri — Source: Esri, USGS, USDA'});
+  const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'});
+  imagery.addTo(map);
+  L.control.layers({'🛰️ Satellite':imagery,'🗺️ Street':street},null,{collapsed:false}).addTo(map);
+}
+
+function setGPSStatus(text,type='waiting'){$('gpsStatus').textContent=text;$('gpsStatus').className='status '+type}
+function mapStatus(show,text='📡 جاري تحديد الموقع...'){$('mapStatus').textContent=text;$('mapStatus').style.display=show?'block':'none'}
+
+function startGPS(){
+  if(!navigator.geolocation){alert('هذا الجهاز أو المتصفح لا يدعم خدمة تحديد الموقع.');return}
+  if(gpsActive){setGPSStatus('📡 GPS يعمل ويتم تحسين الموقع باستمرار','good');return}
+  gpsSession++; const session=gpsSession; gpsActive=true; firstFix=false; saveCandidatePosition=null;
+  $('locationBtn').disabled=true; $('locationBtn').textContent='📡 جاري الحصول على الموقع...'; mapStatus(true);
+  setGPSStatus('📡 نحاول أولاً الحصول على موقع سريع، ثم نحسّن الدقة...','waiting');
+
+  navigator.geolocation.getCurrentPosition(
+    p=>{if(session!==gpsSession)return;processGPSPosition(p,true);startHighAccuracyWatch(session)},
+    err=>{if(session!==gpsSession)return;startHighAccuracyWatch(session);handleGPSError(err)},
+    {enableHighAccuracy:false,timeout:QUICK_TIMEOUT,maximumAge:60000}
+  );
+}
+
+function startHighAccuracyWatch(session){
+  if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null}
+  gpsWatchId=navigator.geolocation.watchPosition(
+    p=>{if(session!==gpsSession)return;processGPSPosition(p,false)},
+    e=>{if(session!==gpsSession)return;handleGPSError(e)},
+    {enableHighAccuracy:true,timeout:HIGH_TIMEOUT,maximumAge:1000}
+  );
+  $('locationBtn').disabled=false; $('locationBtn').textContent='📍 GPS يعمل — تحديث الموقع';
+}
+
+function processGPSPosition(position,isFirst=false){
+  if(!position?.coords)return;
+  const c=position.coords, lat=num(c.latitude), lng=num(c.longitude), accuracy=num(c.accuracy), altitude=num(c.altitude);
+  if(lat===null||lng===null||accuracy===null)return;
+  if(accuracy>MAX_DISPLAY_ACCURACY){setGPSStatus('📡 GPS يعمل — الدقة الحالية '+fmt(accuracy,1)+' م','waiting');return}
+  latestPosition=position;
+  if(accuracy<=MAX_SAVE_ACCURACY) saveCandidatePosition=position;
+  updateMap(lat,lng,accuracy);
+  $('gpsLat').textContent=lat.toFixed(7); $('gpsLng').textContent=lng.toFixed(7);
+  $('gpsAccuracy').textContent=accuracy.toFixed(1)+' m';
+  $('gpsAltitude').textContent=altitude===null?'غير متاح':altitude.toFixed(1)+' m';
+  if(!firstFix){firstFix=true;map.setView([lat,lng],19,{animate:true});mapStatus(false)}
+  if(accuracy<=10)setGPSStatus('✅ دقة ممتازة — '+accuracy.toFixed(1)+' م','good');
+  else if(accuracy<=15)setGPSStatus('✅ الموقع صالح للحفظ — '+accuracy.toFixed(1)+' م','good');
+  else setGPSStatus('📡 جاري تحسين الدقة — '+accuracy.toFixed(1)+' م','waiting');
+  scheduleElevation(lat,lng,accuracy);
+  calculateLevels();
+}
+
+function updateMap(lat,lng,accuracy){
+  if(!userMarker){
+    userMarker=L.marker([lat,lng]).addTo(map).bindPopup('📍 <b>موقع GPS الحالي</b>');
+  }else userMarker.setLatLng([lat,lng]);
+  userMarker.setPopupContent('<b>📍 موقع GPS</b><br>Latitude: '+lat.toFixed(7)+'<br>Longitude: '+lng.toFixed(7)+'<br>Accuracy: '+accuracy.toFixed(1)+' m');
+  if(!accuracyCircle){accuracyCircle=L.circle([lat,lng],{radius:accuracy,weight:2,fillOpacity:.12}).addTo(map)}else{accuracyCircle.setLatLng([lat,lng]);accuracyCircle.setRadius(accuracy)}
+}
+
+function scheduleElevation(lat,lng,accuracy){
+  if(accuracy>50)return;
+  const key=lat.toFixed(4)+','+lng.toFixed(4); const now=Date.now();
+  if(key===lastElevationKey && now-lastElevationRequest<ELEVATION_MIN_INTERVAL)return;
+  if(elevationRequestInProgress)return;
+  lastElevationKey=key; lastElevationRequest=now; elevationRequestInProgress=true;
+  $('elevationSource').textContent='⏳ جاري استخراج ارتفاع سطح الأرض من Copernicus DEM...';
+  fetch('https://api.open-meteo.com/v1/elevation?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lng),{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw new Error('Elevation HTTP '+r.status);return r.json()})
+    .then(data=>{
+      const e=num(Array.isArray(data.elevation)?data.elevation[0]:data.elevation);
+      if(e===null)throw new Error('No elevation');
+      groundElevation=e; $('gpsGround').textContent=e.toFixed(1)+' m'; $('groundElevation').textContent=e.toFixed(1);
+      $('elevationSource').textContent='Copernicus DEM GLO-90 — دقة مكانية 90م تقريبًا.';
+      calculateLevels();
+    })
+    .catch(err=>{$('elevationSource').textContent='تعذر جلب DEM حاليًا. يمكنك إعادة المحاولة مع تحديث GPS.';console.warn(err)})
+    .finally(()=>{elevationRequestInProgress=false});
+}
+
+function calculateLevels(){
+  const ge=groundElevation;
+  const crownDepth=num($('pipeCrownDepth').value); const diameter=num($('pipeDiameter').value);
+  $('coverElevation').value=ge===null?'':ge.toFixed(2);
+  if(ge!==null && crownDepth!==null){
+    const crown=ge-crownDepth; $('crownElevation').value=crown.toFixed(2);
+    if(diameter!==null){$('invertElevation').value=(crown-diameter/1000).toFixed(2)} else $('invertElevation').value='';
+  }else{$('crownElevation').value='';$('invertElevation').value=''}
+}
+
+$('pipeCrownDepth').addEventListener('input',calculateLevels);
+$('pipeDiameter').addEventListener('input',calculateLevels);
+
+function freshPosition(){
+  if(!saveCandidatePosition)return null;
+  const age=Date.now()-Number(saveCandidatePosition.timestamp);
+  const acc=num(saveCandidatePosition.coords?.accuracy);
+  if(!Number.isFinite(age)||age<0||age>MAX_SAVE_AGE||acc===null||acc>MAX_SAVE_ACCURACY)return null;
+  return saveCandidatePosition;
+}
+
+function saveRecord(){
+  const position=freshPosition();
+  if(!position){alert('⚠️ لا توجد قراءة GPS حديثة وصالحة للحفظ.\n\nانتظر حتى تصبح الدقة 15 مترًا أو أفضل، ثم احفظ النقطة.');return}
+  const name=$('pointName').value.trim(); if(!name){alert('أدخل رقم النقطة أو المطبق أولاً.');$('pointName').focus();return}
+  const lat=num(position.coords.latitude),lng=num(position.coords.longitude),acc=num(position.coords.accuracy),gpsAlt=num(position.coords.altitude);
+  const md=num($('manholeDepth').value),cd=num($('pipeCrownDepth').value),dia=num($('pipeDiameter').value);
+  const crown=groundElevation!==null&&cd!==null?groundElevation-cd:null;
+  const invert=crown!==null&&dia!==null?crown-dia/1000:null;
+  const now=new Date();
+  const rec={
+    pointName:name,elementType:$('elementType').value,latitude:lat,longitude:lng,accuracy:acc,gpsAltitude:gpsAlt,
+    groundElevation:groundElevation,manholeDepth:md,pipeCrownDepth:cd,pipeDiameter:dia,
+    coverElevation:groundElevation,crownElevation:crown,invertElevation:invert,flowDirection:$('flowDirection').value,
+    notes:$('notes').value.trim(),datetime:now.toISOString()
+  };
+  if(editingIndex>=0){tableData[editingIndex]=rec;editingIndex=-1}else tableData.push(rec);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData)); renderTable(); resetForm(false);
+  alert('✅ تم حفظ النقطة بنجاح.');
+}
+
+function resetForm(clearGPS=false){
+  editingIndex=-1;$('saveBtn').textContent='💾 حفظ النقطة';$('cancelBtn').classList.add('hidden');
+  ['pointName','manholeDepth','pipeCrownDepth','pipeDiameter','coverElevation','crownElevation','invertElevation','notes'].forEach(id=>$(id).value='');
+  $('elementType').value='مطبق صرف صحي';$('flowDirection').value='غير محدد';
+  if(clearGPS){groundElevation=null;latestPosition=null;saveCandidatePosition=null}
+  calculateLevels();
+}
+
+function editRecord(i){
+  const r=tableData[i];editingIndex=i;
+  $('pointName').value=r.pointName||'';$('elementType').value=r.elementType||'مطبق صرف صحي';$('manholeDepth').value=r.manholeDepth??'';$('pipeCrownDepth').value=r.pipeCrownDepth??'';$('pipeDiameter').value=r.pipeDiameter??'';$('flowDirection').value=r.flowDirection||'غير محدد';$('notes').value=r.notes||'';
+  groundElevation=r.groundElevation??null;
+  if(groundElevation!==null){$('groundElevation').textContent=fmt(groundElevation,1);$('gpsGround').textContent=fmt(groundElevation,1)+' m'}
+  calculateLevels();$('saveBtn').textContent='💾 تحديث النقطة';$('cancelBtn').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});
+}
+function deleteRecord(i){if(!confirm('هل تريد حذف هذه النقطة؟'))return;tableData.splice(i,1);localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData));renderTable()}
+function clearAllData(){if(!tableData.length)return;if(!confirm('سيتم حذف جميع السجلات من هذا الجهاز. هل أنت متأكد؟'))return;tableData=[];localStorage.removeItem(STORAGE_KEY);renderTable()}
+
+function renderTable(){
+  const tbody=document.querySelector('#dataTable tbody');tbody.innerHTML='';
+  tableData.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    const cells=[i+1,r.pointName,r.elementType,fmt(r.latitude,7),fmt(r.longitude,7),fmt(r.accuracy,1),fmt(r.gpsAltitude,1),fmt(r.groundElevation,1),fmt(r.manholeDepth,2),fmt(r.pipeCrownDepth,2),r.pipeDiameter??'--',fmt(r.crownElevation,2),fmt(r.invertElevation,2),formatDate(r.datetime),r.notes||''];
+    cells.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+    const action=document.createElement('td');action.innerHTML='<button class="mini edit" onclick="editRecord('+i+')">تعديل</button><button class="mini del" onclick="deleteRecord('+i+')">حذف</button>';tr.appendChild(action);tbody.appendChild(tr)
+  });
+  $('count').textContent=tableData.length;$('sCount').textContent=tableData.length;
+  const accs=tableData.map(r=>r.accuracy).filter(Number.isFinite),els=tableData.map(r=>r.groundElevation).filter(Number.isFinite),invs=tableData.map(r=>r.invertElevation).filter(Number.isFinite);
+  $('sAcc').textContent=accs.length?fmt(accs.reduce((a,b)=>a+b,0)/accs.length,1):'--';$('sElev').textContent=els.length?fmt(els.reduce((a,b)=>a+b,0)/els.length,1):'--';$('sMinInv').textContent=invs.length?fmt(Math.min(...invs),2):'--';$('sMaxInv').textContent=invs.length?fmt(Math.max(...invs),2):'--';
+}
+function formatDate(iso){try{return new Date(iso).toLocaleString('ar-EG')}catch{return iso||''}}
+
+function exportToExcel(){
+  if(!tableData.length){alert('لا توجد نقاط لتصديرها.');return}
+  const rows=tableData.map((r,i)=>({
+    'م':i+1,'رقم النقطة':r.pointName,'نوع العنصر':r.elementType,'Latitude':r.latitude,'Longitude':r.longitude,'دقة GPS (m)':r.accuracy,'ارتفاع GPS (m)':r.gpsAltitude,
+    'سطح الأرض DEM (m)':r.groundElevation,'عمق المطبق (m)':r.manholeDepth,'عمق وش الماسورة (m)':r.pipeCrownDepth,'قطر الماسورة (mm)':r.pipeDiameter,
+    'منسوب الغطاء/سطح الأرض (m)':r.coverElevation,'منسوب وش الماسورة (m)':r.crownElevation,'Invert (m)':r.invertElevation,'اتجاه الخط':r.flowDirection,'التاريخ والوقت':formatDate(r.datetime),'ملاحظات':r.notes
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:6},{wch:18},{wch:18},{wch:14},{wch:14},{wch:14},{wch:15},{wch:20},{wch:18},{wch:21},{wch:18},{wch:24},{wch:22},{wch:15},{wch:15},{wch:22}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Survey Points');
+  const info=XLSX.utils.json_to_sheet([{Field:'Coordinate System',Value:'WGS84 / EPSG:4326'},{Field:'Ground Elevation Source',Value:'Copernicus DEM GLO-90 via Open-Meteo'},{Field:'DEM Resolution',Value:'90 m'},{Field:'GPS Save Threshold',Value:'<= 15 m'}]);XLSX.utils.book_append_sheet(wb,info,'Metadata');
+  XLSX.writeFile(wb,'HydroGIS_Survey_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function downloadJSON(){
+  if(!tableData.length){alert('لا توجد سجلات لحفظها.');return}
+  const blob=new Blob([JSON.stringify({app:'HydroGIS Utility v2',createdAt:new Date().toISOString(),records:tableData},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='HydroGIS_Survey_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+
+function handleGPSError(error){
+  let msg='تعذر الحصول على الموقع.';
+  if(error?.code===1)msg='تم رفض إذن الموقع. فعّل Location/GPS من إعدادات المتصفح أو الهاتف.';
+  else if(error?.code===2)msg='تعذر تحديد الموقع حاليًا. تأكد من تفعيل GPS وأنك في مكان مفتوح.';
+  else if(error?.code===3)msg='انتهت مهلة قراءة GPS. سيستمر التطبيق في محاولة تحسين الموقع.';
+  setGPSStatus('⚠️ '+msg,'bad');mapStatus(false);$('locationBtn').disabled=false;$('locationBtn').textContent='📍 إعادة تحديد الموقع';
+}
+
+window.addEventListener('load',()=>{initMap();try{tableData=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(tableData))tableData=[]}catch{tableData=[]}renderTable()});
+window.addEventListener('beforeunload',()=>{if(gpsWatchId!==null&&navigator.geolocation)navigator.geolocation.clearWatch(gpsWatchId)});
+</script>
 </body>
 </html>
