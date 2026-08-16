@@ -11,7 +11,9 @@
                    maximum-scale=1.0,
                    user-scalable=no">
 
-    <title>HydroGIS Utility - الرفع المساحي لشبكات الصرف</title>
+    <title>
+        HydroGIS Utility - الرفع المساحي لشبكات الصرف
+    </title>
 
 
     <!-- =====================================================
@@ -26,11 +28,11 @@
          WebToNative
     ====================================================== -->
 
-    <script src="https://unpkg.com/[email protected]/webtonative.min.js"></script>
+    <script src="https://unpkg.com/webtonative@1.0.0/webtonative.min.js"></script>
 
 
     <!-- =====================================================
-         SheetJS - إنشاء Excel حقيقي XLSX
+         SheetJS
     ====================================================== -->
 
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -45,7 +47,6 @@
         * {
             box-sizing: border-box;
         }
-
 
         body {
 
@@ -62,7 +63,6 @@
             background: #eef2f5;
 
             color: #333;
-
         }
 
 
@@ -72,9 +72,7 @@
 
             color: #2c3e50;
 
-            margin:
-                5px 0;
-
+            margin: 5px 0;
         }
 
 
@@ -89,7 +87,6 @@
             margin-bottom: 15px;
 
             font-weight: 600;
-
         }
 
 
@@ -102,7 +99,6 @@
             flex-wrap: wrap;
 
             justify-content: center;
-
         }
 
 
@@ -124,9 +120,7 @@
                 0 4px 10px
                 rgba(0,0,0,0.15);
 
-            border:
-                2px solid white;
-
+            border: 2px solid white;
         }
 
 
@@ -149,14 +143,12 @@
                 rgba(0,0,0,0.12);
 
             max-width: 420px;
-
         }
 
 
         .form-group {
 
             margin-bottom: 12px;
-
         }
 
 
@@ -171,7 +163,6 @@
             color: #555;
 
             font-size: 14px;
-
         }
 
 
@@ -181,13 +172,11 @@
 
             padding: 11px;
 
-            border:
-                1px solid #ddd;
+            border: 1px solid #ddd;
 
             border-radius: 5px;
 
             font-size: 15px;
-
         }
 
 
@@ -196,7 +185,6 @@
             border-color: #3498db;
 
             outline: none;
-
         }
 
 
@@ -223,58 +211,44 @@
             margin-bottom: 9px;
 
             font-weight: bold;
-
         }
 
 
         .btn-location {
 
-            background:
-                #e67e22;
-
+            background: #e67e22;
         }
 
 
         .btn-location:disabled {
 
-            background:
-                #999;
+            background: #999;
 
-            cursor:
-                wait;
-
+            cursor: wait;
         }
 
 
         .btn-save {
 
-            background:
-                #27ae60;
-
+            background: #27ae60;
         }
 
 
         .btn-reset {
 
-            background:
-                #95a5a6;
-
+            background: #95a5a6;
         }
 
 
         .btn-export {
 
-            background:
-                #3498db;
-
+            background: #3498db;
         }
 
 
         .btn-download-manager {
 
-            background:
-                #8e44ad;
-
+            background: #8e44ad;
         }
 
 
@@ -284,8 +258,7 @@
 
         .gps-panel {
 
-            background:
-                #f8f9fa;
+            background: #f8f9fa;
 
             border-radius: 7px;
 
@@ -293,9 +266,7 @@
 
             margin-bottom: 12px;
 
-            border:
-                1px solid #ddd;
-
+            border: 1px solid #ddd;
         }
 
 
@@ -305,9 +276,7 @@
 
             margin-bottom: 8px;
 
-            color:
-                #2c3e50;
-
+            color: #2c3e50;
         }
 
 
@@ -315,56 +284,43 @@
 
             display: flex;
 
-            justify-content:
-                space-between;
+            justify-content: space-between;
 
             padding: 5px 0;
 
-            border-bottom:
-                1px solid #eee;
+            border-bottom: 1px solid #eee;
 
             font-size: 13px;
-
         }
 
 
         .gps-row:last-child {
 
             border-bottom: none;
-
         }
 
 
         .accuracy-good {
 
-            color:
-                #27ae60;
+            color: #27ae60;
 
-            font-weight:
-                bold;
-
+            font-weight: bold;
         }
 
 
         .accuracy-medium {
 
-            color:
-                #f39c12;
+            color: #f39c12;
 
-            font-weight:
-                bold;
-
+            font-weight: bold;
         }
 
 
         .accuracy-bad {
 
-            color:
-                #c0392b;
+            color: #c0392b;
 
-            font-weight:
-                bold;
-
+            font-weight: bold;
         }
 
 
@@ -381,40 +337,30 @@
             font-size: 13px;
 
             font-weight: bold;
-
         }
 
 
         .status-waiting {
 
-            background:
-                #fff3cd;
+            background: #fff3cd;
 
-            color:
-                #856404;
-
+            color: #856404;
         }
 
 
         .status-good {
 
-            background:
-                #d4edda;
+            background: #d4edda;
 
-            color:
-                #155724;
-
+            color: #155724;
         }
 
 
         .status-bad {
 
-            background:
-                #f8d7da;
+            background: #f8d7da;
 
-            color:
-                #721c24;
-
+            color: #721c24;
         }
 
 
@@ -437,7 +383,6 @@
                 rgba(0,0,0,0.12);
 
             overflow-x: auto;
-
         }
 
 
@@ -445,15 +390,13 @@
 
             width: 100%;
 
-            border-collapse:
-                collapse;
+            border-collapse: collapse;
 
             margin-top: 10px;
 
             font-size: 13px;
 
             min-width: 1000px;
-
         }
 
 
@@ -464,28 +407,21 @@
 
             padding: 10px;
 
-            border-bottom:
-                1px solid #eee;
-
+            border-bottom: 1px solid #eee;
         }
 
 
         th {
 
-            background:
-                #f8f9fa;
+            background: #f8f9fa;
 
-            color:
-                #333;
-
+            color: #333;
         }
 
 
         tr:hover {
 
-            background:
-                #f5f5f5;
-
+            background: #f5f5f5;
         }
 
 
@@ -495,42 +431,31 @@
 
         .action-btn {
 
-            padding:
-                6px 9px;
+            padding: 6px 9px;
 
             border: none;
 
-            border-radius:
-                4px;
+            border-radius: 4px;
 
-            cursor:
-                pointer;
+            cursor: pointer;
 
-            font-size:
-                12px;
+            font-size: 12px;
 
-            margin:
-                2px;
+            margin: 2px;
 
-            color:
-                white;
-
+            color: white;
         }
 
 
         .edit-btn {
 
-            background:
-                #f39c12;
-
+            background: #f39c12;
         }
 
 
         .delete-btn {
 
-            background:
-                #c0392b;
-
+            background: #c0392b;
         }
 
 
@@ -540,38 +465,27 @@
 
         .dev-watermark {
 
-            margin-top:
-                15px;
+            margin-top: 15px;
 
-            padding-top:
-                10px;
+            padding-top: 10px;
 
-            border-top:
-                1px dashed #ddd;
+            border-top: 1px dashed #ddd;
 
-            text-align:
-                left;
+            text-align: left;
 
-            font-size:
-                12px;
+            font-size: 12px;
 
-            color:
-                #95a5a6;
+            color: #95a5a6;
 
-            font-family:
-                monospace;
-
+            font-family: monospace;
         }
 
 
         .dev-watermark span {
 
-            color:
-                #2980b9;
+            color: #2980b9;
 
-            font-weight:
-                bold;
-
+            font-weight: bold;
         }
 
 
@@ -583,45 +497,33 @@
 
             body {
 
-                padding:
-                    8px;
-
+                padding: 8px;
             }
 
 
             #map {
 
-                height:
-                    400px;
+                height: 400px;
 
-                min-width:
-                    100%;
+                min-width: 100%;
 
-                order:
-                    1;
-
+                order: 1;
             }
 
 
             .form-panel {
 
-                order:
-                    2;
+                order: 2;
 
-                max-width:
-                    none;
+                max-width: none;
 
-                width:
-                    100%;
-
+                width: 100%;
             }
 
 
             #table-container {
 
-                order:
-                    3;
-
+                order: 3;
             }
 
         }
@@ -633,10 +535,6 @@
 
 <body>
 
-
-    <!-- =====================================================
-         TITLE
-    ====================================================== -->
 
     <h2>
         🌐 HydroGIS Utility
@@ -650,10 +548,6 @@
     </div>
 
 
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
     <div class="main-container">
 
 
@@ -665,15 +559,11 @@
 
 
         <!-- =================================================
-             FORM PANEL
+             FORM
         ================================================== -->
 
         <div class="form-panel">
 
-
-            <!-- =================================================
-                 GPS BUTTON
-            ================================================== -->
 
             <button
                 id="locationBtn"
@@ -685,12 +575,9 @@
             </button>
 
 
-            <!-- =================================================
-                 GPS INFORMATION
-            ================================================== -->
+            <!-- GPS INFORMATION -->
 
             <div class="gps-panel">
-
 
                 <div class="gps-title">
 
@@ -759,46 +646,35 @@
 
                 </div>
 
-
             </div>
 
 
-            <!-- =================================================
-                 HIDDEN GPS FIELDS
-            ================================================== -->
+            <!-- HIDDEN GPS -->
 
             <input
                 type="hidden"
                 id="lat">
 
-
             <input
                 type="hidden"
                 id="lng">
 
-
             <input
                 type="hidden"
                 id="accuracy">
-
 
             <input
                 type="hidden"
                 id="altitude">
 
 
-            <!-- =================================================
-                 POINT NAME
-            ================================================== -->
+            <!-- POINT NAME -->
 
             <div class="form-group">
 
                 <label>
-
                     رقم الصف / النقطة / المطبق:
-
                 </label>
-
 
                 <input
                     type="text"
@@ -808,18 +684,13 @@
             </div>
 
 
-            <!-- =================================================
-                 MANHOLE DEPTH
-            ================================================== -->
+            <!-- MANHOLE DEPTH -->
 
             <div class="form-group">
 
                 <label>
-
                     عمق المطبق (متر):
-
                 </label>
-
 
                 <input
                     type="number"
@@ -830,18 +701,13 @@
             </div>
 
 
-            <!-- =================================================
-                 PIPE CROWN
-            ================================================== -->
+            <!-- PIPE CROWN -->
 
             <div class="form-group">
 
                 <label>
-
                     عمق وش الماسورة (متر):
-
                 </label>
-
 
                 <input
                     type="number"
@@ -852,18 +718,13 @@
             </div>
 
 
-            <!-- =================================================
-                 DIAMETER
-            ================================================== -->
+            <!-- DIAMETER -->
 
             <div class="form-group">
 
                 <label>
-
                     قطر ماسورة الصرف (مم):
-
                 </label>
-
 
                 <input
                     type="number"
@@ -873,18 +734,13 @@
             </div>
 
 
-            <!-- =================================================
-                 NOTES
-            ================================================== -->
+            <!-- NOTES -->
 
             <div class="form-group">
 
                 <label>
-
                     ملاحظات:
-
                 </label>
-
 
                 <input
                     type="text"
@@ -894,9 +750,7 @@
             </div>
 
 
-            <!-- =================================================
-                 SAVE
-            ================================================== -->
+            <!-- SAVE -->
 
             <button
                 id="saveBtn"
@@ -908,9 +762,7 @@
             </button>
 
 
-            <!-- =================================================
-                 RESET
-            ================================================== -->
+            <!-- RESET -->
 
             <button
                 id="resetBtn"
@@ -923,9 +775,7 @@
             </button>
 
 
-            <!-- =================================================
-                 EXPORT EXCEL
-            ================================================== -->
+            <!-- EXCEL -->
 
             <button
                 class="btn btn-export"
@@ -936,9 +786,7 @@
             </button>
 
 
-            <!-- =================================================
-                 DOWNLOAD MANAGER
-            ================================================== -->
+            <!-- DOWNLOAD MANAGER -->
 
             <button
                 class="btn btn-download-manager"
@@ -948,10 +796,6 @@
 
             </button>
 
-
-            <!-- =================================================
-                 DEVELOPER
-            ================================================== -->
 
             <div class="dev-watermark">
 
@@ -965,95 +809,64 @@
 
             </div>
 
-
         </div>
 
     </div>
 
 
     <!-- =====================================================
-         DATA TABLE
+         TABLE
     ====================================================== -->
 
     <div id="table-container">
 
-
         <h3>
-
             📊 السجلات المساحية
-
         </h3>
 
 
         <table id="dataTable">
 
-
             <thead>
 
                 <tr>
 
-                    <th>
-                        م
-                    </th>
+                    <th>م</th>
 
-                    <th>
-                        رقم المطبق
-                    </th>
+                    <th>رقم المطبق</th>
 
-                    <th>
-                        Latitude
-                    </th>
+                    <th>Latitude</th>
 
-                    <th>
-                        Longitude
-                    </th>
+                    <th>Longitude</th>
 
-                    <th>
-                        دقة GPS
-                    </th>
+                    <th>دقة GPS</th>
 
-                    <th>
-                        الارتفاع
-                    </th>
+                    <th>الارتفاع</th>
 
-                    <th>
-                        عمق المطبق
-                    </th>
+                    <th>عمق المطبق</th>
 
-                    <th>
-                        عمق الوش
-                    </th>
+                    <th>عمق الوش</th>
 
-                    <th>
-                        القطر
-                    </th>
+                    <th>القطر</th>
 
-                    <th>
-                        ملاحظات
-                    </th>
+                    <th>ملاحظات</th>
 
-                    <th>
-                        تحكم
-                    </th>
+                    <th>تحكم</th>
 
                 </tr>
 
             </thead>
 
 
-            <tbody>
-
-            </tbody>
-
+            <tbody></tbody>
 
         </table>
-
 
     </div>
 
 
     <!-- =====================================================
-         LEAFLET JS
+         LEAFLET
     ====================================================== -->
 
     <script
@@ -1069,20 +882,21 @@
 
 
         /* =====================================================
-           MAP INITIALIZATION
+           MAP
         ====================================================== */
 
         const map =
+
             L.map('map')
+
              .setView(
+
                  [30.0444, 31.2357],
+
                  6
+
              );
 
-
-        /* =====================================================
-           ESRI WORLD IMAGERY
-        ====================================================== */
 
         L.tileLayer(
 
@@ -1118,37 +932,54 @@
 
         let editingIndex = -1;
 
+        let gpsSession = 0;
+
+        let gpsTimer = null;
+
+        let firstFixReceived = false;
+
+
+        /* =====================================================
+           GPS SETTINGS
+        ====================================================== */
 
         /*
-           أقصى دقة نسمح بالحفظ عندها
-
-           15 متر أو أقل
+           الحد الأقصى للحفظ
         */
 
         const MAX_SAVE_ACCURACY = 15;
 
 
         /*
-           عندما تصل الدقة إلى 8 متر
-           نتوقف عن البحث
+           الهدف الأفضل.
+           عند الوصول إلى 10 متر أو أفضل
+           ننهي البحث فورًا.
         */
 
-        const TARGET_ACCURACY = 8;
+        const TARGET_ACCURACY = 10;
 
 
         /*
-           أقصى مدة للبحث عن GPS
+           الحد الأقصى لجلسة البحث
         */
 
-        const GPS_TIMEOUT = 30000;
+        const GPS_TIMEOUT = 5000;
+
+
+        /*
+           لا نستخدم قراءة GPS قديمة.
+           مهم جدًا لأن المستخدم ينتقل
+           من مطبق إلى آخر.
+        */
+
+        const GPS_MAX_AGE = 0;
 
 
         /* =====================================================
            PAGE LOAD
         ====================================================== */
 
-        window.onload = function () {
-
+        window.onload = function() {
 
             const savedData =
                 localStorage.getItem(
@@ -1158,36 +989,24 @@
 
             if (savedData) {
 
-
                 try {
 
-
                     tableData =
-                        JSON.parse(
-                            savedData
-                        );
-
+                        JSON.parse(savedData);
 
                     renderTable();
-
 
                 }
 
                 catch (error) {
 
-
-                    console.error(
-                        error
-                    );
-
+                    console.error(error);
 
                     tableData = [];
-
 
                 }
 
             }
-
 
         };
 
@@ -1198,37 +1017,29 @@
 
         function persistData() {
 
-
             localStorage.setItem(
 
                 'hydrogis_manholes_data',
 
-                JSON.stringify(
-                    tableData
-                )
+                JSON.stringify(tableData)
 
             );
-
 
         }
 
 
         /* =====================================================
            START GPS
+           FAST + FRESH POSITION
         ====================================================== */
 
         function startHighAccuracyGPS() {
 
-
-            if (
-                !navigator.geolocation
-            ) {
-
+            if (!navigator.geolocation) {
 
                 alert(
                     "هذا الجهاز لا يدعم خدمة GPS."
                 );
-
 
                 return;
 
@@ -1236,34 +1047,52 @@
 
 
             /*
-               إيقاف أي عملية قديمة
+               إيقاف أي جلسة سابقة
             */
 
             stopGPS();
 
 
+            /*
+               إنشاء جلسة GPS جديدة
+            */
+
+            gpsSession++;
+
+            const thisSession =
+                gpsSession;
+
+
+            /*
+               تصفير أفضل قراءة
+            */
+
             bestPosition = null;
 
             gpsReadingCount = 0;
 
+            firstFixReceived = false;
+
+
+            /*
+               الزر
+            */
 
             const locationBtn =
                 document.getElementById(
-                    'locationBtn'
+                    "locationBtn"
                 );
 
 
-            locationBtn.disabled =
-                true;
-
+            locationBtn.disabled = true;
 
             locationBtn.innerText =
-                "📡 جاري البحث عن أفضل موقع...";
+                "📡 تحديد الموقع...";
 
 
             updateGPSStatus(
 
-                "جاري استقبال قراءات GPS...",
+                "📡 جاري البحث عن موقع GPS جديد...",
 
                 "waiting"
 
@@ -1271,25 +1100,54 @@
 
 
             /*
-               قراءة أولية
+               =================================================
+               FIRST POSITION
+               =================================================
+
+               نحاول الحصول على أول قراءة
+               حديثة وعالية الدقة.
             */
 
             navigator.geolocation.getCurrentPosition(
 
-                processGPSPosition,
+                function(position) {
 
-                handleGPSError,
+                    if (
+                        thisSession !== gpsSession
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    processGPSPosition(
+                        position
+                    );
+
+                },
+
+                function(error) {
+
+                    console.log(
+                        "Initial GPS:",
+                        error
+                    );
+
+
+                    handleGPSError(
+                        error
+                    );
+
+                },
 
                 {
 
-                    enableHighAccuracy:
-                        true,
+                    enableHighAccuracy: true,
 
-                    timeout:
-                        15000,
+                    timeout: 4500,
 
-                    maximumAge:
-                        0
+                    maximumAge: GPS_MAX_AGE
 
                 }
 
@@ -1297,27 +1155,51 @@
 
 
             /*
-               مراقبة مستمرة
+               =================================================
+               WATCH POSITION
+               =================================================
+
+               الاستمرار في استقبال القراءات
+               لاختيار أفضل موقع.
             */
 
             gpsWatchId =
 
                 navigator.geolocation.watchPosition(
 
-                    processGPSPosition,
+                    function(position) {
 
-                    handleGPSError,
+                        if (
+                            thisSession !== gpsSession
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        processGPSPosition(
+                            position
+                        );
+
+                    },
+
+                    function(error) {
+
+                        console.log(
+                            "GPS Watch:",
+                            error
+                        );
+
+                    },
 
                     {
 
-                        enableHighAccuracy:
-                            true,
+                        enableHighAccuracy: true,
 
-                        timeout:
-                            15000,
+                        timeout: 4500,
 
-                        maximumAge:
-                            0
+                        maximumAge: GPS_MAX_AGE
 
                     }
 
@@ -1325,56 +1207,84 @@
 
 
             /*
-               إيقاف بعد 30 ثانية
+               =================================================
+               HARD LIMIT
+               =================================================
+
+               مهما حدث لن تتجاوز جلسة البحث
+               5 ثوانٍ.
             */
 
-            setTimeout(
+            gpsTimer =
 
-                function() {
+                setTimeout(
 
+                    function() {
 
-                    if (
-                        gpsWatchId !== null
-                    ) {
+                        if (
+                            thisSession === gpsSession
+                        ) {
 
+                            finishGPS();
 
-                        finishGPS();
+                        }
 
+                    },
 
-                    }
+                    GPS_TIMEOUT
 
-
-                },
-
-                GPS_TIMEOUT
-
-            );
+                );
 
         }
 
 
         /* =====================================================
            PROCESS GPS POSITION
+
+           اختيار أفضل قراءة حديثة
         ====================================================== */
 
         function processGPSPosition(
             position
         ) {
 
-
             gpsReadingCount++;
+
+
+            const coords =
+                position.coords;
+
+
+            const lat =
+                Number(
+                    coords.latitude
+                );
+
+
+            const lng =
+                Number(
+                    coords.longitude
+                );
 
 
             const accuracy =
                 Number(
-                    position.coords.accuracy
+                    coords.accuracy
                 );
 
 
+            /*
+               التحقق من صحة البيانات
+            */
+
             if (
-                !isFinite(
-                    accuracy
-                )
+
+                !isFinite(lat) ||
+
+                !isFinite(lng) ||
+
+                !isFinite(accuracy)
+
             ) {
 
                 return;
@@ -1383,18 +1293,114 @@
 
 
             /*
-               اختيار أفضل قراءة
+               تجاهل القراءات السيئة جدًا
             */
 
             if (
-
-                bestPosition === null ||
-
-                accuracy <
-                bestPosition.coords.accuracy
-
+                accuracy > 100
             ) {
 
+                updateGPSStatus(
+
+                    "📡 GPS يبحث... الدقة الحالية " +
+                    accuracy.toFixed(1) +
+                    " متر",
+
+                    "waiting"
+
+                );
+
+                return;
+
+            }
+
+
+            /*
+               =================================================
+               أول قراءة صالحة
+               =================================================
+            */
+
+            if (
+                bestPosition === null
+            ) {
+
+                bestPosition =
+                    position;
+
+
+                firstFixReceived = true;
+
+
+                updateMapPosition(
+                    position
+                );
+
+
+                updateGPSInformation(
+                    position
+                );
+
+
+                updateGPSStatus(
+
+                    "📡 تم الحصول على موقع حديث — الدقة " +
+                    accuracy.toFixed(1) +
+                    " متر",
+
+                    accuracy <= MAX_SAVE_ACCURACY
+
+                        ? "good"
+
+                        : "waiting"
+
+                );
+
+
+                /*
+                   لا ننهي عند أول قراءة 15 متر.
+
+                   ننتظر حتى 10 متر إن أمكن
+                   للحفاظ على دقة المكان.
+                */
+
+                if (
+                    accuracy <= TARGET_ACCURACY
+                ) {
+
+                    finishGPS();
+
+                    return;
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+               =================================================
+               مقارنة القراءة الجديدة
+               بأفضل قراءة سابقة
+               =================================================
+            */
+
+            const bestAccuracy =
+                Number(
+                    bestPosition.coords.accuracy
+                );
+
+
+            /*
+               إذا كانت القراءة الجديدة
+               أفضل من السابقة
+            */
+
+            if (
+                accuracy < bestAccuracy
+            ) {
 
                 bestPosition =
                     position;
@@ -1410,26 +1416,34 @@
                 );
 
 
-            }
+                updateGPSStatus(
+
+                    "📡 تحسن الموقع — الدقة " +
+                    accuracy.toFixed(1) +
+                    " متر",
+
+                    accuracy <= MAX_SAVE_ACCURACY
+
+                        ? "good"
+
+                        : "waiting"
+
+                );
 
 
-            /*
-               إذا وصلت الدقة إلى 8 متر
-               نعتبر القراءة جيدة جدًا
-            */
+                /*
+                   الوصول للدقة المستهدفة
+                */
 
-            if (
+                if (
+                    accuracy <= TARGET_ACCURACY
+                ) {
 
-                bestPosition &&
+                    finishGPS();
 
-                bestPosition.coords.accuracy
-                <= TARGET_ACCURACY
+                    return;
 
-            ) {
-
-
-                finishGPS();
-
+                }
 
             }
 
@@ -1438,36 +1452,58 @@
 
         /* =====================================================
            FINISH GPS
+
+           أقصى مدة = 5 ثوانٍ
         ====================================================== */
 
         function finishGPS() {
 
-
             stopGPS();
+
+
+            /*
+               إلغاء المؤقت
+            */
+
+            if (
+                gpsTimer !== null
+            ) {
+
+                clearTimeout(
+                    gpsTimer
+                );
+
+                gpsTimer = null;
+
+            }
 
 
             const locationBtn =
                 document.getElementById(
-                    'locationBtn'
+                    "locationBtn"
                 );
 
 
-            locationBtn.disabled =
-                false;
+            locationBtn.disabled = false;
 
+
+            /*
+               =================================================
+               لم نحصل على أي قراءة
+               =================================================
+            */
 
             if (
                 !bestPosition
             ) {
 
-
                 locationBtn.innerText =
-                    "📍 إعادة محاولة تحديد الموقع";
+                    "📍 إعادة المحاولة";
 
 
                 updateGPSStatus(
 
-                    "❌ لم يتم الحصول على موقع",
+                    "❌ لم يتم الحصول على موقع GPS خلال 5 ثوانٍ",
 
                     "bad"
 
@@ -1480,7 +1516,9 @@
 
 
             /*
-               أفضل قراءة
+               =================================================
+               اعتماد أفضل قراءة
+               =================================================
             */
 
             updateMapPosition(
@@ -1494,14 +1532,20 @@
 
 
             const accuracy =
-                bestPosition.coords.accuracy;
+                Number(
+                    bestPosition.coords.accuracy
+                );
 
+
+            /*
+               =================================================
+               الموقع مقبول للحفظ
+               =================================================
+            */
 
             if (
-                accuracy <=
-                MAX_SAVE_ACCURACY
+                accuracy <= MAX_SAVE_ACCURACY
             ) {
-
 
                 locationBtn.innerText =
                     "✅ تم تحديد الموقع";
@@ -1509,33 +1553,34 @@
 
                 updateGPSStatus(
 
-                    "✅ الموقع جاهز للحفظ — الدقة " +
-
+                    "✅ الموقع جاهز للحفظ — أفضل دقة: " +
                     accuracy.toFixed(1) +
-
                     " متر",
 
                     "good"
 
                 );
 
-
             }
+
+
+            /*
+               =================================================
+               الموقع موجود لكن دقته غير كافية للحفظ
+               =================================================
+            */
 
             else {
 
-
                 locationBtn.innerText =
-                    "⚠️ الدقة ضعيفة - أعد المحاولة";
+                    "⚠️ إعادة تحديد الموقع";
 
 
                 updateGPSStatus(
 
-                    "⚠️ الدقة الحالية " +
-
+                    "⚠️ أفضل دقة خلال 5 ثوانٍ: " +
                     accuracy.toFixed(1) +
-
-                    " متر",
+                    " متر — لا يمكن حفظ النقطة",
 
                     "bad"
 
@@ -1552,21 +1597,28 @@
 
         function stopGPS() {
 
-
             if (
                 gpsWatchId !== null
             ) {
 
-
                 navigator.geolocation.clearWatch(
-
                     gpsWatchId
-
                 );
-
 
                 gpsWatchId = null;
 
+            }
+
+
+            if (
+                gpsTimer !== null
+            ) {
+
+                clearTimeout(
+                    gpsTimer
+                );
+
+                gpsTimer = null;
 
             }
 
@@ -1574,146 +1626,144 @@
 
 
         /* =====================================================
-           UPDATE MAP
+           UPDATE MAP POSITION
         ====================================================== */
 
         function updateMapPosition(
             position
         ) {
 
-
             const lat =
-                position.coords.latitude;
+                Number(
+                    position.coords.latitude
+                );
 
 
             const lng =
-                position.coords.longitude;
+                Number(
+                    position.coords.longitude
+                );
 
 
             const accuracy =
-                position.coords.accuracy;
-
-
-            /*
-               إزالة Marker السابق
-            */
-
-            if (
-                currentUserMarker
-            ) {
-
-
-                map.removeLayer(
-                    currentUserMarker
+                Number(
+                    position.coords.accuracy
                 );
 
 
-            }
-
-
             /*
-               إزالة دائرة الدقة
+               إنشاء Marker أول مرة
             */
 
             if (
-                accuracyCircle
+                currentUserMarker === null
             ) {
 
+                currentUserMarker =
 
-                map.removeLayer(
-                    accuracyCircle
+                    L.marker(
+                        [lat, lng]
+                    )
+                    .addTo(map);
+
+
+                currentUserMarker.bindPopup(
+                    "<b>📍 موقع GPS</b>"
                 );
 
 
+                /*
+                   تحريك الخريطة إلى الموقع
+                   فقط عند أول ظهور للـGPS.
+                */
+
+                map.setView(
+
+                    [lat, lng],
+
+                    19,
+
+                    {
+                        animate: false
+                    }
+
+                );
+
             }
 
+            else {
 
-            /*
-               إنشاء Marker
-            */
-
-            currentUserMarker =
-
-                L.marker(
+                currentUserMarker.setLatLng(
                     [lat, lng]
-                )
-                .addTo(map);
+                );
+
+            }
 
 
             /*
                Popup
             */
 
-            currentUserMarker
-                .bindPopup(
+            currentUserMarker.setPopupContent(
 
-                    "<b>📍 موقع GPS</b>" +
+                "<b>📍 موقع GPS</b>" +
 
-                    "<br>Latitude: " +
+                "<br>Latitude: " +
+                lat.toFixed(7) +
 
-                    lat.toFixed(7) +
+                "<br>Longitude: " +
+                lng.toFixed(7) +
 
-                    "<br>Longitude: " +
+                "<br>Accuracy: " +
+                accuracy.toFixed(1) +
+                " m"
 
-                    lng.toFixed(7) +
-
-                    "<br>Accuracy: " +
-
-                    accuracy.toFixed(1) +
-
-                    " m"
-
-                );
-
-
-            currentUserMarker
-                .openPopup();
+            );
 
 
             /*
                دائرة الدقة
             */
 
-            accuracyCircle =
+            if (
+                accuracyCircle === null
+            ) {
 
-                L.circle(
+                accuracyCircle =
 
-                    [lat, lng],
+                    L.circle(
 
-                    {
+                        [lat, lng],
 
-                        radius:
-                            accuracy,
+                        {
 
-                        weight:
-                            2,
+                            radius:
+                                accuracy,
 
-                        fillOpacity:
-                            0.12
+                            weight:
+                                2,
 
-                    }
+                            fillOpacity:
+                                0.12
 
-                ).addTo(map);
+                        }
 
+                    )
+                    .addTo(map);
 
-            /*
-               Zoom
-            */
+            }
 
-            map.setView(
+            else {
 
-                [lat, lng],
+                accuracyCircle.setLatLng(
+                    [lat, lng]
+                );
 
-                19,
+                accuracyCircle.setRadius(
+                    accuracy
+                );
 
-                {
-
-                    animate:
-                        true
-
-                }
-
-            );
+            }
 
         }
 
@@ -1726,21 +1776,26 @@
             position
         ) {
 
-
             const coords =
                 position.coords;
 
 
             const lat =
-                coords.latitude;
+                Number(
+                    coords.latitude
+                );
 
 
             const lng =
-                coords.longitude;
+                Number(
+                    coords.longitude
+                );
 
 
             const accuracy =
-                coords.accuracy;
+                Number(
+                    coords.accuracy
+                );
 
 
             const altitude =
@@ -1748,7 +1803,7 @@
 
 
             /*
-               Hidden fields
+               Hidden values
             */
 
             document.getElementById(
@@ -1773,15 +1828,16 @@
                 'altitude'
             ).value =
 
-                altitude !== null
+                altitude !== null &&
+                altitude !== undefined
 
-                ? altitude
+                    ? altitude
 
-                : "";
+                    : "";
 
 
             /*
-               Visible coordinates
+               Visible Latitude
             */
 
             document.getElementById(
@@ -1790,6 +1846,10 @@
 
                 lat.toFixed(7);
 
+
+            /*
+               Visible Longitude
+            */
 
             document.getElementById(
                 'gpsLng'
@@ -1811,23 +1871,19 @@
             accuracyElement.innerText =
 
                 accuracy.toFixed(1) +
-
                 " متر";
 
 
-            accuracyElement.className =
-                "";
+            accuracyElement.className = "";
 
 
             if (
                 accuracy <= 8
             ) {
 
-
                 accuracyElement.classList.add(
                     "accuracy-good"
                 );
-
 
             }
 
@@ -1835,21 +1891,17 @@
                 accuracy <= 15
             ) {
 
-
                 accuracyElement.classList.add(
                     "accuracy-medium"
                 );
-
 
             }
 
             else {
 
-
                 accuracyElement.classList.add(
                     "accuracy-bad"
                 );
-
 
             }
 
@@ -1862,13 +1914,15 @@
                 'gpsAltitude'
             ).innerText =
 
-                altitude !== null
+                altitude !== null &&
+                altitude !== undefined
 
-                ? altitude.toFixed(2) +
-                  " m"
+                    ? Number(
+                        altitude
+                      ).toFixed(2) +
+                      " m"
 
-                : "غير متاح";
-
+                    : "غير متاح";
 
         }
 
@@ -1881,7 +1935,6 @@
             text,
             type
         ) {
-
 
             const status =
                 document.getElementById(
@@ -1901,11 +1954,9 @@
                 type === "good"
             ) {
 
-
                 status.classList.add(
                     "status-good"
                 );
-
 
             }
 
@@ -1913,21 +1964,17 @@
                 type === "bad"
             ) {
 
-
                 status.classList.add(
                     "status-bad"
                 );
-
 
             }
 
             else {
 
-
                 status.classList.add(
                     "status-waiting"
                 );
-
 
             }
 
@@ -1942,86 +1989,102 @@
             error
         ) {
 
-
             console.error(
                 "GPS Error:",
                 error
             );
 
 
-            let message =
-                "تعذر تحديد الموقع.";
+            /*
+               Permission denied
+            */
 
-
-            switch (
-                error.code
+            if (
+                error.code === 1
             ) {
 
+                updateGPSStatus(
 
-                case 1:
+                    "❌ تم رفض صلاحية الموقع. فعّل Precise Location للتطبيق.",
 
+                    "bad"
 
-                    message =
-                        "❌ تم رفض صلاحية الموقع. فعّل Precise Location للتطبيق.";
-
-
-                    break;
+                );
 
 
-                case 2:
+                stopGPS();
 
 
-                    message =
-                        "❌ لا يمكن الحصول على الموقع الحالي.";
+                const locationBtn =
+                    document.getElementById(
+                        "locationBtn"
+                    );
 
 
-                    break;
+                locationBtn.disabled =
+                    false;
 
 
-                case 3:
+                locationBtn.innerText =
+                    "📍 إعادة المحاولة";
 
 
-                    message =
-                        "❌ انتهت مهلة البحث عن GPS. حاول مرة أخرى.";
-
-
-                    break;
-
+                return;
 
             }
 
 
-            updateGPSStatus(
+            /*
+               Position unavailable
+            */
 
-                message,
+            if (
+                error.code === 2
+            ) {
 
-                "bad"
+                updateGPSStatus(
 
-            );
+                    "📡 GPS لم يحصل على إشارة كافية...",
 
+                    "waiting"
 
-            const locationBtn =
-                document.getElementById(
-                    'locationBtn'
                 );
 
 
-            locationBtn.disabled =
-                false;
+                return;
+
+            }
 
 
-            locationBtn.innerText =
-                "📍 إعادة محاولة تحديد الموقع";
+            /*
+               Timeout
+            */
+
+            if (
+                error.code === 3
+            ) {
+
+                updateGPSStatus(
+
+                    "📡 GPS ما زال يبحث عن الموقع...",
+
+                    "waiting"
+
+                );
+
+
+                return;
+
+            }
 
         }
 
 
         /* =====================================================
-           SAVE / UPDATE RECORD
+           SAVE / UPDATE
         ====================================================== */
 
         function saveOrUpdateRecord() {
-
 
             const lat =
                 Number(
@@ -2065,19 +2128,17 @@
 
             if (
 
-                !lat ||
+                !isFinite(lat) ||
 
-                !lng ||
+                !isFinite(lng) ||
 
-                !accuracy
+                !isFinite(accuracy)
 
             ) {
-
 
                 alert(
                     "⚠️ يجب تحديد الموقع GPS أولًا."
                 );
-
 
                 return;
 
@@ -2092,7 +2153,6 @@
                 accuracy >
                 MAX_SAVE_ACCURACY
             ) {
-
 
                 alert(
 
@@ -2110,7 +2170,6 @@
 
                 );
 
-
                 return;
 
             }
@@ -2123,7 +2182,6 @@
             if (
                 !pointName
             ) {
-
 
                 alert(
                     "⚠️ يرجى إدخال رقم المطبق."
@@ -2148,16 +2206,15 @@
 
             const record = {
 
-
                 id:
 
                     editingIndex === -1
 
-                    ? Date.now()
+                        ? Date.now()
 
-                    : tableData[
-                        editingIndex
-                    ].id,
+                        : tableData[
+                            editingIndex
+                          ].id,
 
 
                 pointName:
@@ -2180,105 +2237,83 @@
 
                     altitudeText
 
-                    ? Number(
-                        altitudeText
-                    )
+                        ? Number(
+                            altitudeText
+                          )
 
-                    : null,
+                        : null,
 
 
                 manholeDepth:
 
                     document
-                    .getElementById(
-                        'manholeDepth'
-                    )
-                    .value,
+                        .getElementById(
+                            'manholeDepth'
+                        )
+                        .value,
 
 
                 pipeCrownDepth:
 
                     document
-                    .getElementById(
-                        'pipeCrownDepth'
-                    )
-                    .value,
+                        .getElementById(
+                            'pipeCrownDepth'
+                        )
+                        .value,
 
 
                 pipeDiameter:
 
                     document
-                    .getElementById(
-                        'pipeDiameter'
-                    )
-                    .value,
+                        .getElementById(
+                            'pipeDiameter'
+                        )
+                        .value,
 
 
                 notes:
 
                     document
-                    .getElementById(
-                        'notes'
-                    )
-                    .value
+                        .getElementById(
+                            'notes'
+                        )
+                        .value
 
             };
 
 
             /*
-               Add
+               ADD
             */
 
             if (
                 editingIndex === -1
             ) {
 
-
                 tableData.push(
                     record
                 );
 
-
             }
 
             /*
-               Update
+               UPDATE
             */
 
             else {
-
 
                 tableData[
                     editingIndex
                 ] = record;
 
-
-                resetForm();
-
-
             }
 
 
-            /*
-               Save
-            */
-
             persistData();
-
-
-            /*
-               Render
-            */
 
             renderTable();
 
-
-            /*
-               Clear only data fields
-               GPS remains
-            */
-
-            clearInputs();
+            resetForm();
 
 
             alert(
@@ -2294,7 +2329,6 @@
 
         function renderTable() {
 
-
             const tbody =
                 document.querySelector(
                     "#dataTable tbody"
@@ -2308,7 +2342,6 @@
             if (
                 tableData.length === 0
             ) {
-
 
                 tbody.innerHTML = `
 
@@ -2324,7 +2357,6 @@
 
                 `;
 
-
                 return;
 
             }
@@ -2337,18 +2369,13 @@
                     index
                 ) {
 
-
                     const row = `
 
                         <tr>
 
-
                             <td>
-
                                 ${index + 1}
-
                             </td>
-
 
                             <td>
 
@@ -2362,7 +2389,6 @@
 
                             </td>
 
-
                             <td>
 
                                 ${Number(
@@ -2371,7 +2397,6 @@
 
                             </td>
 
-
                             <td>
 
                                 ${Number(
@@ -2379,7 +2404,6 @@
                                 ).toFixed(7)}
 
                             </td>
-
 
                             <td>
 
@@ -2390,44 +2414,45 @@
 
                             </td>
 
-
                             <td>
 
                                 ${
                                     item.altitude !== null &&
                                     item.altitude !== undefined
 
-                                    ? Number(
-                                        item.altitude
-                                      ).toFixed(2)
+                                        ? Number(
+                                            item.altitude
+                                          ).toFixed(2)
 
-                                    : "-"
+                                        : "-"
 
                                 }
 
                             </td>
 
-
                             <td>
 
-                                ${item.manholeDepth || "-"}
+                                ${escapeHTML(
+                                    item.manholeDepth || "-"
+                                )}
 
                             </td>
 
-
                             <td>
 
-                                ${item.pipeCrownDepth || "-"}
+                                ${escapeHTML(
+                                    item.pipeCrownDepth || "-"
+                                )}
 
                             </td>
 
-
                             <td>
 
-                                ${item.pipeDiameter || "-"}
+                                ${escapeHTML(
+                                    item.pipeDiameter || "-"
+                                )}
 
                             </td>
-
 
                             <td>
 
@@ -2437,9 +2462,7 @@
 
                             </td>
 
-
                             <td>
-
 
                                 <button
 
@@ -2464,9 +2487,7 @@
 
                                 </button>
 
-
                             </td>
-
 
                         </tr>
 
@@ -2474,13 +2495,9 @@
 
 
                     tbody.insertAdjacentHTML(
-
                         'beforeend',
-
                         row
-
                     );
-
 
                 }
 
@@ -2497,35 +2514,32 @@
             value
         ) {
 
+            return String(value)
 
-            return String(
-                value
-            )
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
 
-            .replace(
-                /&/g,
-                "&amp;"
-            )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
 
-            .replace(
-                /</g,
-                "&lt;"
-            )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
 
-            .replace(
-                />/g,
-                "&gt;"
-            )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
 
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-
-            .replace(
-                /'/g,
-                "&#039;"
-            );
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
 
         }
 
@@ -2536,35 +2550,29 @@
 
         function clearInputs() {
 
-
             document.getElementById(
                 'pointName'
-            ).value =
-                "";
+            ).value = "";
 
 
             document.getElementById(
                 'manholeDepth'
-            ).value =
-                "";
+            ).value = "";
 
 
             document.getElementById(
                 'pipeCrownDepth'
-            ).value =
-                "";
+            ).value = "";
 
 
             document.getElementById(
                 'pipeDiameter'
-            ).value =
-                "";
+            ).value = "";
 
 
             document.getElementById(
                 'notes'
-            ).value =
-                "";
+            ).value = "";
 
         }
 
@@ -2577,11 +2585,8 @@
             index
         ) {
 
-
             const item =
-                tableData[
-                    index
-                ];
+                tableData[index];
 
 
             editingIndex =
@@ -2591,7 +2596,7 @@
             document.getElementById(
                 'pointName'
             ).value =
-                item.pointName;
+                item.pointName || "";
 
 
             document.getElementById(
@@ -2653,80 +2658,69 @@
                 item.altitude !== null &&
                 item.altitude !== undefined
 
-                ? Number(
-                    item.altitude
-                  ).toFixed(2) +
-                  " m"
+                    ? Number(
+                        item.altitude
+                      ).toFixed(2) +
+                      " m"
 
-                : "غير متاح";
+                    : "غير متاح";
 
 
             document.getElementById(
                 'manholeDepth'
             ).value =
-                item.manholeDepth;
+                item.manholeDepth || "";
 
 
             document.getElementById(
                 'pipeCrownDepth'
             ).value =
-                item.pipeCrownDepth;
+                item.pipeCrownDepth || "";
 
 
             document.getElementById(
                 'pipeDiameter'
             ).value =
-                item.pipeDiameter;
+                item.pipeDiameter || "";
 
 
             document.getElementById(
                 'notes'
             ).value =
-                item.notes;
+                item.notes || "";
 
 
             /*
-               إعادة عرض النقطة
+               عرض الموقع القديم
             */
 
-            if (
+            const position = {
 
-                item.latitude !== undefined &&
+                coords: {
 
-                item.longitude !== undefined
+                    latitude:
+                        Number(
+                            item.latitude
+                        ),
 
-            ) {
+                    longitude:
+                        Number(
+                            item.longitude
+                        ),
 
+                    accuracy:
+                        Number(
+                            item.accuracy || 0
+                        )
 
-                const position = {
+                }
 
-                    coords: {
-
-                        latitude:
-                            Number(
-                                item.latitude
-                            ),
-
-                        longitude:
-                            Number(
-                                item.longitude
-                            ),
-
-                        accuracy:
-                            Number(
-                                item.accuracy || 0
-                            )
-
-                    }
-
-                };
+            };
 
 
-                updateMapPosition(
-                    position
-                );
-
-            }
+            updateMapPosition(
+                position
+            );
 
 
             document.getElementById(
@@ -2755,9 +2749,7 @@
 
         function resetForm() {
 
-
-            editingIndex =
-                -1;
+            editingIndex = -1;
 
 
             clearInputs();
@@ -2785,7 +2777,6 @@
             index
         ) {
 
-
             if (
 
                 !confirm(
@@ -2807,18 +2798,16 @@
 
             persistData();
 
-
             renderTable();
 
         }
 
 
         /* =====================================================
-           CREATE EXCEL WORKBOOK
+           CREATE EXCEL
         ====================================================== */
 
         function createExcelWorkbook() {
-
 
             if (
                 tableData.length === 0
@@ -2829,10 +2818,6 @@
             }
 
 
-            /*
-               تحويل البيانات
-            */
-
             const excelData =
 
                 tableData.map(
@@ -2842,609 +2827,189 @@
                         index
                     ) {
 
-
                         return {
 
-
                             "م":
-
                                 index + 1,
 
-
                             "رقم المطبق":
-
                                 item.pointName,
 
-
                             "Latitude":
-
                                 Number(
                                     item.latitude
                                 ),
 
-
                             "Longitude":
-
                                 Number(
                                     item.longitude
                                 ),
 
-
                             "دقة GPS (م)":
-
                                 Number(
                                     item.accuracy || 0
                                 ),
-
 
                             "الارتفاع (م)":
 
                                 item.altitude !== null &&
                                 item.altitude !== undefined
 
-                                ? Number(
-                                    item.altitude
-                                  )
+                                    ? Number(
+                                        item.altitude
+                                      )
 
-                                : "",
-
+                                    : "",
 
                             "عمق المطبق (م)":
-
                                 item.manholeDepth || "",
 
-
                             "عمق وش الماسورة (م)":
-
                                 item.pipeCrownDepth || "",
 
-
                             "قطر الماسورة (مم)":
-
                                 item.pipeDiameter || "",
 
-
                             "ملاحظات":
-
                                 item.notes || ""
 
                         };
-
 
                     }
 
                 );
 
 
-            /*
-               Worksheet
-            */
+            const wb =
+                XLSX.utils.book_new();
 
-            const worksheet =
 
+            const ws =
                 XLSX.utils.json_to_sheet(
                     excelData
                 );
 
 
-            /*
-               عرض الأعمدة
-            */
-
-            worksheet["!cols"] = [
-
-
-                {
-                    wch: 6
-                },
-
-
-                {
-                    wch: 18
-                },
-
-
-                {
-                    wch: 17
-                },
-
-
-                {
-                    wch: 17
-                },
-
-
-                {
-                    wch: 15
-                },
-
-
-                {
-                    wch: 15
-                },
-
-
-                {
-                    wch: 18
-                },
-
-
-                {
-                    wch: 23
-                },
-
-
-                {
-                    wch: 20
-                },
-
-
-                {
-                    wch: 35
-                }
-
-            ];
-
-
-            /*
-               Workbook
-            */
-
-            const workbook =
-                XLSX.utils.book_new();
-
-
             XLSX.utils.book_append_sheet(
-
-                workbook,
-
-                worksheet,
-
+                wb,
+                ws,
                 "Manholes"
-
             );
 
 
-            return workbook;
+            return wb;
 
         }
 
 
         /* =====================================================
-           EXPORT EXCEL - WEBTONATIVE
+           EXPORT EXCEL
         ====================================================== */
 
-        async function exportToExcel() {
-
+        function exportToExcel() {
 
             if (
                 tableData.length === 0
             ) {
 
-
                 alert(
                     "⚠️ لا توجد بيانات لتصديرها."
                 );
-
 
                 return;
 
             }
 
 
-            try {
+            const wb =
+                createExcelWorkbook();
 
 
-                /*
-                   إنشاء Workbook
-                */
+            if (!wb) {
 
-                const workbook =
-                    createExcelWorkbook();
-
-
-                /*
-                   تحويل Workbook إلى XLSX
-                */
-
-                const excelArray =
-
-                    XLSX.write(
-
-                        workbook,
-
-                        {
-
-                            bookType:
-                                "xlsx",
-
-                            type:
-                                "array"
-
-                        }
-
-                    );
-
-
-                /*
-                   إنشاء Blob
-                */
-
-                const blob =
-
-                    new Blob(
-
-                        [excelArray],
-
-                        {
-
-                            type:
-
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-                        }
-
-                    );
-
-
-                /*
-                   اسم الملف
-                */
-
-                const fileName =
-
-                    "HydroGIS_Manholes_" +
-
-                    getDateTimeString() +
-
-                    ".xlsx";
-
-
-                /*
-                   إنشاء Blob URL
-                */
-
-                const blobUrl =
-
-                    URL.createObjectURL(
-                        blob
-                    );
-
-
-                console.log(
-                    "Excel Blob URL:",
-                    blobUrl
-                );
-
-
-                /*
-                   ==============================================
-                   WEBTONATIVE
-                   ==============================================
-                */
-
-                if (
-
-                    window.WTN &&
-
-                    typeof
-                    window.WTN.customFileDownload
-                    === "function"
-
-                ) {
-
-
-                    console.log(
-                        "Using WebToNative customFileDownload"
-                    );
-
-
-                    window.WTN.customFileDownload(
-
-                        {
-
-                            fileName:
-                                fileName,
-
-
-                            downloadUrl:
-                                blobUrl,
-
-
-                            mimeType:
-
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-
-
-                            cookies:
-                                "",
-
-
-                            isBlob:
-                                true,
-
-
-                            userAgent:
-                                "",
-
-
-                            openFileAfterDownload:
-                                true
-
-                        }
-
-                    );
-
-
-                    /*
-                       نترك Blob URL موجودًا
-                       فترة كافية لـ WebToNative
-                    */
-
-                    setTimeout(
-
-                        function() {
-
-                            URL.revokeObjectURL(
-                                blobUrl
-                            );
-
-                        },
-
-                        30000
-
-                    );
-
-
-                    /*
-                       رسالة للمستخدم
-                    */
-
-                    setTimeout(
-
-                        function() {
-
-                            alert(
-
-                                "✅ تم إرسال ملف Excel إلى مدير التنزيلات في التطبيق."
-
-                            );
-
-                        },
-
-                        1000
-
-                    );
-
-
-                    return;
-
-                }
-
-
-                /*
-                   ==============================================
-                   BROWSER FALLBACK
-                   ==============================================
-                */
-
-                console.log(
-                    "WebToNative API not found - Browser mode"
-                );
-
-
-                const a =
-                    document.createElement(
-                        "a"
-                    );
-
-
-                a.href =
-                    blobUrl;
-
-
-                a.download =
-                    fileName;
-
-
-                a.style.display =
-                    "none";
-
-
-                document.body.appendChild(
-                    a
-                );
-
-
-                a.click();
-
-
-                document.body.removeChild(
-                    a
-                );
-
-
-                setTimeout(
-
-                    function() {
-
-                        URL.revokeObjectURL(
-                            blobUrl
-                        );
-
-                    },
-
-                    10000
-
-                );
-
-
-                alert(
-
-                    "📥 تم إنشاء ملف Excel وتنزيله."
-
-                );
-
+                return;
 
             }
 
-            catch (error) {
+
+            const fileName =
+
+                "HydroGIS_Manholes_" +
+
+                new Date()
+                    .toISOString()
+                    .slice(0,10) +
+
+                ".xlsx";
 
 
-                console.error(
-                    "Excel Error:",
-                    error
-                );
+            XLSX.writeFile(
+                wb,
+                fileName
+            );
 
 
-                alert(
+            updateGPSStatus(
 
-                    "❌ حدث خطأ أثناء إنشاء ملف Excel:\n\n" +
+                "📊 تم إنشاء ملف Excel بنجاح",
 
-                    error.message
-
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           OPEN WEBTONATIVE DOWNLOAD MANAGER
-        ====================================================== */
-
-        function openDownloadManager() {
-
-
-            /*
-               WebToNative Download Manager
-            */
-
-            try {
-
-
-                window.location.href =
-                    "w2n://download-screen";
-
-
-            }
-
-            catch (error) {
-
-
-                alert(
-
-                    "افتح مجلد Downloads في الهاتف للبحث عن الملف."
-
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           DATE / TIME FOR FILE NAME
-        ====================================================== */
-
-        function getDateTimeString() {
-
-
-            const now =
-                new Date();
-
-
-            const year =
-                now.getFullYear();
-
-
-            const month =
-
-                String(
-                    now.getMonth() + 1
-                )
-                .padStart(
-                    2,
-                    "0"
-                );
-
-
-            const day =
-
-                String(
-                    now.getDate()
-                )
-                .padStart(
-                    2,
-                    "0"
-                );
-
-
-            const hour =
-
-                String(
-                    now.getHours()
-                )
-                .padStart(
-                    2,
-                    "0"
-                );
-
-
-            const minute =
-
-                String(
-                    now.getMinutes()
-                )
-                .padStart(
-                    2,
-                    "0"
-                );
-
-
-            const second =
-
-                String(
-                    now.getSeconds()
-                )
-                .padStart(
-                    2,
-                    "0"
-                );
-
-
-            return (
-
-                year +
-
-                "-" +
-
-                month +
-
-                "-" +
-
-                day +
-
-                "_" +
-
-                hour +
-
-                "-" +
-
-                minute +
-
-                "-" +
-
-                second
+                "good"
 
             );
 
         }
 
 
-    </script>
+        /* =====================================================
+           DOWNLOAD MANAGER
+        ====================================================== */
 
+        function openDownloadManager() {
+
+            /*
+               محاولة فتح صفحة التنزيلات في المتصفح
+            */
+
+            try {
+
+                window.open(
+                    "about:downloads",
+                    "_blank"
+                );
+
+            }
+
+            catch (error) {
+
+                alert(
+
+                    "📂 افتح تطبيق Downloads / التنزيلات في الهاتف لرؤية الملفات."
+
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           MAP RESIZE FIX
+        ====================================================== */
+
+        setTimeout(
+
+            function() {
+
+                map.invalidateSize();
+
+            },
+
+            500
+
+        );
+
+
+    </script>
 
 </body>
 
