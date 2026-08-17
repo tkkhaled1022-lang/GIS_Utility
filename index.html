@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HydroGIS Utility v4 - الرفع المساحي لشبكات الصرف</title>
+<title>HydroGIS Utility v4.1 - الرفع المساحي لشبكات الصرف</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -26,7 +26,17 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
 .small{font-size:11px;color:var(--muted);line-height:1.5}
 .section-title{font-size:18px;font-weight:900;margin:0 0 10px;color:#2578c4}.table-card{margin-top:14px;padding:14px;overflow:hidden}.table-scroll{overflow:auto}table{width:100%;min-width:1250px;border-collapse:collapse;font-size:12px}th,td{padding:9px 7px;border-bottom:1px solid #e7ecef;text-align:center;white-space:nowrap}th{background:#f2f6f9;color:#344652;position:sticky;top:0;z-index:1}tr:hover{background:#f8fbfd}.mini{padding:5px 8px;border:0;border-radius:5px;color:#fff;cursor:pointer;font-size:11px;font-weight:700;margin:1px}.edit{background:#e49b18}.del{background:#c73e3e}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat span{font-size:12px;color:var(--muted)}
-.footer{margin-top:12px;background:#fff9e9;border:1px solid #f0d99a;border-radius:10px;padding:10px;font-size:12px;line-height:1.7;color:#6b5a24}.settings{margin-top:10px}.settings summary{cursor:pointer;font-weight:800;color:#5b6770}.hidden{display:none}.photo-box{background:#f8fafb;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}.photo-preview{display:none;width:100%;max-height:240px;object-fit:cover;border-radius:8px;margin-top:8px;border:1px solid var(--line)}.photo-info{font-size:11px;color:var(--muted);margin-top:6px}.photo-thumb{width:65px;height:50px;object-fit:cover;border-radius:5px;border:1px solid #ccd5dc}.photo-view{background:#2980b9}
+.footer{margin-top:12px;background:#fff9e9;border:1px solid #f0d99a;border-radius:10px;padding:10px;font-size:12px;line-height:1.7;color:#6b5a24}.settings{margin-top:10px}.settings summary{cursor:pointer;font-weight:800;color:#5b6770}.hidden{display:none}
+
+/* تصميم قسم الصور المتعددة */
+.photo-box{background:#f8fafb;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:8px;margin-top:8px}
+.photo-thumb-card{position:relative;background:#fff;border:1px solid #ccd5dc;border-radius:6px;overflow:hidden;padding:2px;text-align:center}
+.photo-thumb-card img{width:100%;height:60px;object-fit:cover;border-radius:4px}
+.photo-thumb-card button{background:var(--red);color:#fff;border:0;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:bold;position:absolute;top:4px;right:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
+.photo-thumb{width:45px;height:35px;object-fit:cover;border-radius:4px;border:1px solid #ccd5dc;margin:1px;cursor:pointer}
+.photos-cell{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap}
+
 .leaflet-control-layers{direction:ltr}.leaflet-popup-content{direction:rtl;text-align:right}
 @media(max-width:900px){body{padding:8px}.grid{grid-template-columns:1fr}.panel{order:2}#map{height:430px}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:21px}.subtitle{font-size:12px}.row2{grid-template-columns:1fr 1fr}}
 </style>
@@ -34,7 +44,7 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
 <body>
 <div class="app">
 <h1>🌐 HydroGIS Utility — الرفع المساحي لشبكات الصرف</h1>
-<div class="subtitle">تسجيل المواقع باستخدام GPS • إدخال بيانات شبكة الصرف • تسجيل عدة نقاط • تصدير Excel</div>
+<div class="subtitle">تسجيل المواقع باستخدام GPS • إدخال بيانات شبكة الصرف • صور متعددة للمطبق • تصدير Excel</div>
 
 <div class="grid">
 <section class="card map-card">
@@ -67,12 +77,12 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
     <div class="form-group"><label>قطر الماسورة (مم)</label><input id="pipeDiameter" type="number" step="1" placeholder="600"></div>
     <div class="form-group"><label>اتجاه الخط</label><select id="flowDirection"><option value="غير محدد">غير محدد</option><option value="داخل المطبق">داخل المطبق</option><option value="خارج المطبق">خارج المطبق</option></select></div>
   </div>
+  
   <div class="photo-box">
-    <label>📷 صورة المطبق</label>
-    <input id="photoInput" type="file" accept="image/*" capture="environment" onchange="handlePhotoSelection(event)">
-    <img id="photoPreview" class="photo-preview" alt="صورة المطبق">
-    <div id="photoInfo" class="photo-info">يمكن التقاط صورة بالكاميرا مباشرة من الهاتف أو اختيار صورة من الجهاز.</div>
-    <button type="button" id="removePhotoBtn" class="btn gray hidden" onclick="removeSelectedPhoto()">🗑️ إزالة الصورة</button>
+    <label>📷 صور المطبق (يمكنك إضافة عدة صور)</label>
+    <input id="photoInput" type="file" accept="image/*" capture="environment" multiple onchange="handlePhotoSelection(event)">
+    <div id="photosPreviewContainer" class="photos-grid"></div>
+    <div id="photoInfo" class="photo-info" style="margin-top:6px">التقط أو اختر عدة صور حسب الحاجة (عامة، غطاء، داخلية...).</div>
   </div>
 
   <div class="form-group"><label>ملاحظات</label><input id="notes" placeholder="أية ملاحظات..."></div>
@@ -87,8 +97,8 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
     <summary>⚙️ إعدادات التطبيق</summary>
     <div class="small" style="margin-top:8px">
       <b>نظام الإحداثيات:</b> WGS84 / EPSG:4326<br>
-      <b>الارتفاع:</b> تم إلغاء ارتفاع سطح الأرض من التطبيق لأن DEM المتاح عبر الخدمات العامة لا يمثل دقة رفع مساحي مناسبة لشبكات الصرف.<br>
-      <b>شرط الحفظ:</b> دقة GPS ≤ 15 م وقراءة حديثة ≤ 8 ثوانٍ. يستخدم التطبيق آخر Fix حديث لتقليل زمن الانتظار ثم يحسّن الدقة تلقائيًا.
+      <b>الصور المتعددة:</b> يتم حفظ أسماء جميع الصور مفصولة بفواصل في ملف Excel وتصديرها داخل ملف ZIP مرتبة برقم النقطة.<br>
+      <b>شرط الحفظ:</b> دقة GPS ≤ 15 م وقراءة حديثة.
     </div>
   </details>
   <div class="small" style="margin-top:10px;text-align:center">Designed by <b>Khaled — GIS Developer</b></div>
@@ -100,7 +110,7 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
   <div class="table-scroll">
   <table id="dataTable">
     <thead><tr>
-      <th>#</th><th>رقم النقطة</th><th>النوع</th><th>Latitude</th><th>Longitude</th><th>دقة GPS</th><th>ارتفاع GPS</th><th>عمق المطبق</th><th>عمق الوش</th><th>القطر</th><th>اتجاه الخط</th><th>الصورة</th><th>اسم ملف الصورة</th><th>التاريخ والوقت</th><th>ملاحظات</th><th>إجراءات</th>
+      <th>#</th><th>رقم النقطة</th><th>النوع</th><th>Latitude</th><th>Longitude</th><th>دقة GPS</th><th>ارتفاع GPS</th><th>عمق المطبق</th><th>عمق الوش</th><th>القطر</th><th>اتجاه الخط</th><th>الصور</th><th>أسماء ملفات الصور</th><th>التاريخ والوقت</th><th>ملاحظات</th><th>إجراءات</th>
     </tr></thead>
     <tbody></tbody>
   </table>
@@ -114,7 +124,7 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
   <div class="stat"><b id="sDiameter">--</b><span>متوسط قطر الماسورة (مم)</span></div>
 </div>
 
-<div class="footer">⚠️ <b>ملاحظة مساحية مهمة:</b> إحداثيات GPS في الهاتف مناسبة للتوثيق والرفع الاستكشافي، لكنها ليست بديلًا عن GNSS RTK أو Total Station عند الحاجة إلى دقة تنفيذية عالية. يُفضّل ربط الرفع بالـBenchmark والمرجع الأفقي والرأسي المعتمد للمشروع.</div>
+<div class="footer">⚠️ <b>ملاحظة مساحية مهمة:</b> إحداثيات GPS في الهاتف مناسبة للتوثيق والرفع الاستكشافي، لكنها ليست بديلًا عن GNSS RTK عند الحاجة إلى دقة تنفيذية عالية.</div>
 </div>
 
 <script>
@@ -125,14 +135,14 @@ const MAX_DISPLAY_ACCURACY = 100;
 const MAX_SAVE_AGE = 5000;
 const QUICK_TIMEOUT = 4000;
 const HIGH_TIMEOUT = 10000;
-const STORAGE_KEY = 'hydrogis_manholes_data_v3';
+const STORAGE_KEY = 'hydrogis_manholes_data_v4';
 
 let map, userMarker=null, accuracyCircle=null, gpsWatchId=null;
 let gpsActive=false, gpsSession=0, firstFix=false;
 let latestPosition=null, saveCandidatePosition=null;
 
 let tableData=[]; let editingIndex=-1;
-let selectedPhotoData=null, selectedPhotoName='', selectedPhotoMime='image/jpeg';
+let currentPhotos = []; // مصفوفة لتخزين الصور المؤقتة للنقطة الحالية [{data, name, mime}]
 const CACHED_MAX_AGE = 30000;
 
 function $(id){return document.getElementById(id)}
@@ -158,12 +168,9 @@ function startGPS(){
   $('locationBtn').disabled=true; $('locationBtn').textContent='📡 تحديد سريع...'; mapStatus(true,'📡 البحث السريع عن موقعك...');
   setGPSStatus('⚡ نحاول استخدام آخر موقع معروف فورًا، ثم نطلب GPS أدق...','waiting');
 
-  // المرحلة الأولى: قراءة سريعة جدًا. maximumAge يسمح باستخدام آخر Fix حديث
-  // بدل انتظار بدء GPS من الصفر في كل مرة. هذه أهم نقطة لتقليل زمن الانتظار.
   navigator.geolocation.getCurrentPosition(
     p=>{if(session!==gpsSession)return;processGPSPosition(p,true);startHighAccuracyWatch(session)},
     err=>{if(session!==gpsSession)return;
-      // إذا لم تصل القراءة السريعة، نبدأ GPS عالي الدقة مباشرة بدل الانتظار الطويل.
       startHighAccuracyWatch(session);
       setGPSStatus('📡 لم تتوفر قراءة سريعة — جاري GPS عالي الدقة...','waiting');
     },
@@ -181,7 +188,6 @@ function startHighAccuracyWatch(session){
   $('locationBtn').disabled=false; $('locationBtn').textContent='📍 تحديث الموقع';
 }
 
-// إعادة تشغيل البحث من الصفر عند الحاجة، مع الاستفادة من الكاش أولًا.
 function refreshGPS(){
   if(gpsWatchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null}
   gpsActive=false; firstFix=false; latestPosition=null; saveCandidatePosition=null;
@@ -200,9 +206,9 @@ function processGPSPosition(position,isFirst=false){
   $('gpsAccuracy').textContent=accuracy.toFixed(1)+' m';
   $('gpsAltitude').textContent=altitude===null?'غير متاح':altitude.toFixed(1)+' m';
   if(!firstFix){firstFix=true;map.setView([lat,lng],19,{animate:true});mapStatus(false)}
-  if(accuracy<=10)setGPSStatus('✅ دقة ممتازة — '+accuracy.toFixed(1)+' م','good');
-  else if(accuracy<=15)setGPSStatus('✅ الموقع صالح للحفظ — '+accuracy.toFixed(1)+' م','good');
-  else setGPSStatus('📡 جاري تحسين الدقة — '+accuracy.toFixed(1)+' م','waiting');
+  if(accuracy<=10)setGPSStatus('✅ دقة ممتازة — '+accuracy.toFixed(1)+' m','good');
+  else if(accuracy<=15)setGPSStatus('✅ الموقع صالح للحفظ — '+accuracy.toFixed(1)+' m','good');
+  else setGPSStatus('📡 جاري تحسين الدقة — '+accuracy.toFixed(1)+' m','waiting');
 }
 
 function updateMap(lat,lng,accuracy){
@@ -213,13 +219,77 @@ function updateMap(lat,lng,accuracy){
   if(!accuracyCircle){accuracyCircle=L.circle([lat,lng],{radius:accuracy,weight:2,fillOpacity:.12}).addTo(map)}else{accuracyCircle.setLatLng([lat,lng]);accuracyCircle.setRadius(accuracy)}
 }
 
-
 function freshPosition(){
   if(!saveCandidatePosition)return null;
   const age=Date.now()-Number(saveCandidatePosition.timestamp);
   const acc=num(saveCandidatePosition.coords?.accuracy);
   if(!Number.isFinite(age)||age<0||age>MAX_SAVE_AGE||acc===null||acc>MAX_SAVE_ACCURACY)return null;
   return saveCandidatePosition;
+}
+
+function sanitizeFileName(name){return String(name||'').replace(/[\/:*?"<>|]/g,'_').replace(/\s+/g,'_')}
+
+// إدارة الصور المتعددة
+async function handlePhotoSelection(event){
+  const files=event.target.files; if(!files || !files.length) return;
+  for(let i=0; i<files.length; i++){
+    const file=files[i];
+    let originalName=sanitizeFileName(file.name)||('MH_photo_'+Date.now()+'.jpg');
+    let data = await readFileAsDataURL(file);
+    data = await compressImage(data, 1400, 0.82);
+    currentPhotos.push({
+      data: data,
+      name: originalName.replace(/\.[^.]+$/, '') + '.jpg',
+      mime: 'image/jpeg'
+    });
+  }
+  renderPhotosPreview();
+  event.target.value = ''; // إعادة تعيين الحقل ليسمح باختيار نفس الصور مرة أخرى إن أُمِر
+}
+
+function readFileAsDataURL(file){
+  return new Promise((resolve)=>{
+    const reader=new FileReader();
+    reader.onload=e=>resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(dataUrl,maxWidth=1400,quality=.82){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const scale=Math.min(1,maxWidth/img.width);
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*scale));
+      c.height=Math.max(1,Math.round(img.height*scale));
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      resolve(c.toDataURL('image/jpeg',quality));
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+}
+
+function renderPhotosPreview(){
+  const container = $('photosPreviewContainer');
+  container.innerHTML = '';
+  if(!currentPhotos.length){
+    $('photoInfo').textContent = 'لم يتم اختيار صور بعد.';
+    return;
+  }
+  $('photoInfo').textContent = 'تم إرفاق ' + currentPhotos.length + ' صورة.';
+  currentPhotos.forEach((photo, index)=>{
+    const card = document.createElement('div');
+    card.className = 'photo-thumb-card';
+    card.innerHTML = '<img src="'+photo.data+'" alt="معاينة"><button type="button" onclick="removePhoto('+index+')">×</button>';
+    container.appendChild(card);
+  });
+}
+
+function removePhoto(index){
+  currentPhotos.splice(index, 1);
+  renderPhotosPreview();
 }
 
 function saveRecord(){
@@ -229,56 +299,51 @@ function saveRecord(){
   const lat=num(position.coords.latitude),lng=num(position.coords.longitude),acc=num(position.coords.accuracy),gpsAlt=num(position.coords.altitude);
   const md=num($('manholeDepth').value),cd=num($('pipeCrownDepth').value),dia=num($('pipeDiameter').value);
   const now=new Date();
+  
   const rec={
-    pointName:name,elementType:$('elementType').value,latitude:lat,longitude:lng,accuracy:acc,gpsAltitude:gpsAlt,
-    manholeDepth:md,pipeCrownDepth:cd,pipeDiameter:dia,flowDirection:$('flowDirection').value,
-    photoData:selectedPhotoData||'',photoFileName:selectedPhotoName||'',photoMime:selectedPhotoMime||'image/jpeg',
-    notes:$('notes').value.trim(),datetime:now.toISOString()
+    pointName:name, elementType:$('elementType').value, latitude:lat, longitude:lng, accuracy:acc, gpsAltitude:gpsAlt,
+    manholeDepth:md, pipeCrownDepth:cd, pipeDiameter:dia, flowDirection:$('flowDirection').value,
+    photos: [...currentPhotos], // حفظ مصفوفة الصور كاملة
+    notes:$('notes').value.trim(), datetime:now.toISOString()
   };
+
   if(editingIndex>=0){
-    if(!selectedPhotoData && tableData[editingIndex].photoData){
-      rec.photoData=tableData[editingIndex].photoData;
-      rec.photoFileName=tableData[editingIndex].photoFileName||'';
-      rec.photoMime=tableData[editingIndex].photoMime||'image/jpeg';
-    }
-    tableData[editingIndex]=rec;editingIndex=-1
-  }else tableData.push(rec);
+    tableData[editingIndex]=rec; editingIndex=-1;
+  } else {
+    tableData.push(rec);
+  }
+
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData));}
-  catch(e){alert('⚠️ تعذر حفظ السجل بسبب امتلاء مساحة التخزين المحلية. صدّر المشروع ثم احذف السجلات القديمة من الجهاز.');return}
+  catch(e){alert('⚠️ تعذر حفظ السجل بسبب امتلاء الذاكرة المحلية. صدّر المشروع كملف ZIP واحذف السجلات.');return}
+  
   renderTable(); resetForm(false);
   saveCandidatePosition=null;
-  setGPSStatus('✅ تم تسجيل النقطة والصورة. انتقل للموقع التالي واضغط «إعادة قراءة GPS».','good');
-  alert('✅ تم حفظ النقطة والصورة بنجاح.');
+  setGPSStatus('✅ تم تسجيل النقطة والصور بنجاح. انتقل للموقع التالي.','good');
+  alert('✅ تم حفظ النقطة والصور بنجاح.');
 }
 
 function resetForm(clearGPS=false){
   editingIndex=-1;$('saveBtn').textContent='💾 حفظ النقطة';$('cancelBtn').classList.add('hidden');
   ['pointName','manholeDepth','pipeCrownDepth','pipeDiameter','notes'].forEach(id=>$(id).value='');
   $('elementType').value='مطبق صرف صحي';$('flowDirection').value='غير محدد';
-  removeSelectedPhoto();
+  currentPhotos=[]; renderPhotosPreview();
   if(clearGPS){latestPosition=null;saveCandidatePosition=null}
 }
-function sanitizeFileName(name){return String(name||'').replace(/[\/:*?"<>|]/g,'_').replace(/\s+/g,'_')}
-function handlePhotoSelection(event){
-  const file=event.target.files&&event.target.files[0]; if(!file)return;
-  selectedPhotoName=sanitizeFileName(file.name)||('MH_'+Date.now()+'.jpg'); selectedPhotoMime=file.type||'image/jpeg';
-  const reader=new FileReader();
-  reader.onload=e=>compressImage(e.target.result,1400,.82).then(data=>{
-    selectedPhotoData=data;selectedPhotoName=selectedPhotoName.replace(/\.[^.]+$/,'')+'.jpg';selectedPhotoMime='image/jpeg';
-    $('photoPreview').src=data;$('photoPreview').style.display='block';$('photoInfo').textContent='تم تجهيز الصورة: '+selectedPhotoName;$('removePhotoBtn').classList.remove('hidden');
-  });
-  reader.readAsDataURL(file);
-}
-function compressImage(dataUrl,maxWidth=1400,quality=.82){return new Promise(resolve=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,maxWidth/img.width);const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality))};img.onerror=()=>resolve(dataUrl);img.src=dataUrl})}
-function removeSelectedPhoto(){selectedPhotoData=null;selectedPhotoName='';selectedPhotoMime='image/jpeg';if($('photoInput'))$('photoInput').value='';$('photoPreview').src='';$('photoPreview').style.display='none';$('photoInfo').textContent='يمكن التقاط صورة بالكاميرا مباشرة من الهاتف أو اختيار صورة من الجهاز.';$('removePhotoBtn').classList.add('hidden')}
-
 
 function editRecord(i){
-  const r=tableData[i];editingIndex=i;
-  $('pointName').value=r.pointName||'';$('elementType').value=r.elementType||'مطبق صرف صحي';$('manholeDepth').value=r.manholeDepth??'';$('pipeCrownDepth').value=r.pipeCrownDepth??'';$('pipeDiameter').value=r.pipeDiameter??'';$('flowDirection').value=r.flowDirection||'غير محدد';$('notes').value=r.notes||'';
-  if(r.photoData){selectedPhotoData=r.photoData;selectedPhotoName=r.photoFileName||('MH_'+sanitizeFileName(r.pointName)+'.jpg');selectedPhotoMime=r.photoMime||'image/jpeg';$('photoPreview').src=r.photoData;$('photoPreview').style.display='block';$('photoInfo').textContent='الصورة الحالية: '+selectedPhotoName;$('removePhotoBtn').classList.remove('hidden')}else removeSelectedPhoto();
-$('saveBtn').textContent='💾 تحديث النقطة';$('cancelBtn').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});
+  const r=tableData[i]; editingIndex=i;
+  $('pointName').value=r.pointName||''; $('elementType').value=r.elementType||'مطبق صرف صحي';
+  $('manholeDepth').value=r.manholeDepth??''; $('pipeCrownDepth').value=r.pipeCrownDepth??'';
+  $('pipeDiameter').value=r.pipeDiameter??''; $('flowDirection').value=r.flowDirection||'غير محدد';
+  $('notes').value=r.notes||'';
+  
+  // استرجاع الصور الخاصة بالنقطة
+  currentPhotos = r.photos ? [...r.photos] : (r.photoData ? [{data: r.photoData, name: r.photoFileName || 'photo.jpg', mime: r.photoMime || 'image/jpeg'}] : []);
+  renderPhotosPreview();
+
+  $('saveBtn').textContent='💾 تحديث النقطة'; $('cancelBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'});
 }
+
 function deleteRecord(i){if(!confirm('هل تريد حذف هذه النقطة؟'))return;tableData.splice(i,1);localStorage.setItem(STORAGE_KEY,JSON.stringify(tableData));renderTable()}
 function clearAllData(){if(!tableData.length)return;if(!confirm('سيتم حذف جميع السجلات من هذا الجهاز. هل أنت متأكد؟'))return;tableData=[];localStorage.removeItem(STORAGE_KEY);renderTable()}
 
@@ -288,13 +353,40 @@ function renderTable(){
     const tr=document.createElement('tr');
     const cells=[i+1,r.pointName,r.elementType,fmt(r.latitude,7),fmt(r.longitude,7),fmt(r.accuracy,1),fmt(r.gpsAltitude,1),fmt(r.manholeDepth,2),fmt(r.pipeCrownDepth,2),r.pipeDiameter??'--',r.flowDirection||'غير محدد'];
     cells.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
-    const photoTd=document.createElement('td');if(r.photoData)photoTd.innerHTML='<img class="photo-thumb" src="'+r.photoData+'" alt="صورة">';else photoTd.textContent='—';tr.appendChild(photoTd);
-    const nameTd=document.createElement('td');nameTd.textContent=r.photoFileName||'—';tr.appendChild(nameTd);
+    
+    // عمود عرض الصور المصغرة في الجدول
+    const photoTd=document.createElement('td');
+    photoTd.className = 'photos-cell';
+    const photosList = r.photos && r.photos.length ? r.photos : (r.photoData ? [{data: r.photoData}] : []);
+    if(photosList.length){
+      photosList.forEach((p, pIdx)=>{
+        const img=document.createElement('img');
+        img.className='photo-thumb';
+        img.src=p.data;
+        img.title='عرض الصورة';
+        img.onclick=()=>viewSpecificPhoto(i, pIdx);
+        photoTd.appendChild(img);
+      });
+    } else {
+      photoTd.textContent='—';
+    }
+    tr.appendChild(photoTd);
+
+    // أسماء ملفات الصور
+    const namesTd=document.createElement('td');
+    namesTd.textContent = photosList.map(p=>p.name).filter(Boolean).join(', ') || '—';
+    tr.appendChild(namesTd);
+
     const dateTd=document.createElement('td');dateTd.textContent=formatDate(r.datetime);tr.appendChild(dateTd);
     const notesTd=document.createElement('td');notesTd.textContent=r.notes||'';tr.appendChild(notesTd);
-    const action=document.createElement('td');action.innerHTML='<button class="mini edit" onclick="editRecord('+i+')">تعديل</button>'+(r.photoData?'<button class="mini photo-view" onclick="viewPhoto('+i+')">الصورة</button>':'')+'<button class="mini del" onclick="deleteRecord('+i+')">حذف</button>';tr.appendChild(action);tbody.appendChild(tr)
+    
+    const action=document.createElement('td');
+    action.innerHTML='<button class="mini edit" onclick="editRecord('+i+')">تعديل</button><button class="mini del" onclick="deleteRecord('+i+')">حذف</button>';
+    tr.appendChild(action);
+    tbody.appendChild(tr);
   });
-  $('count').textContent=tableData.length;$('sCount').textContent=tableData.length;
+  
+  $('count').textContent=tableData.length; $('sCount').textContent=tableData.length;
   const accs=tableData.map(r=>r.accuracy).filter(Number.isFinite);
   const depths=tableData.map(r=>r.manholeDepth).filter(Number.isFinite);
   const dias=tableData.map(r=>r.pipeDiameter).filter(Number.isFinite);
@@ -302,59 +394,122 @@ function renderTable(){
   $('sDepth').textContent=depths.length?fmt(depths.reduce((a,b)=>a+b,0)/depths.length,2):'--';
   $('sDiameter').textContent=dias.length?fmt(dias.reduce((a,b)=>a+b,0)/dias.length,0):'--';
 }
+
 function formatDate(iso){try{return new Date(iso).toLocaleString('ar-EG')}catch{return iso||''}}
 
-function viewPhoto(i){const r=tableData[i];if(!r.photoData){alert('لا توجد صورة لهذا المطبق.');return}const w=window.open('','_blank');if(!w){alert('اسمح بالنوافذ المنبثقة لعرض الصورة.');return}w.document.write('<title>'+escapeHtml(r.pointName)+'</title><style>body{margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh}img{max-width:100%;max-height:100vh}</style><img src=\"'+r.photoData+'\">');w.document.close()}
-function dataURLToBlob(dataUrl){const parts=dataUrl.split(',');const mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';const bin=atob(parts[1]);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:mime})}
+function viewSpecificPhoto(pointIdx, photoIdx){
+  const r=tableData[pointIdx];
+  const photosList = r.photos && r.photos.length ? r.photos : (r.photoData ? [{data: r.photoData, name: r.photoFileName}] : []);
+  const p = photosList[photoIdx];
+  if(!p || !p.data) return;
+  const w=window.open('','_blank');
+  if(!w){alert('اسمح بالنوافذ المنبثقة لعرض الصورة.');return}
+  w.document.write('<title>'+escapeHtml(r.pointName)+' - '+escapeHtml(p.name||'')+'</title><style>body{margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh}img{max-width:100%;max-height:100vh}</style><img src="'+p.data+'">');
+  w.document.close();
+}
+
+function dataURLToBlob(dataUrl){
+  const parts=dataUrl.split(',');
+  const mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+  const bin=atob(parts[1]);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
 async function exportProjectPackage(){
- if(!tableData.length){alert('لا توجد نقاط لتصديرها.');return} if(typeof JSZip==='undefined'){alert('تعذر تحميل أداة ZIP. تحقق من اتصال الإنترنت.');return}
- const zip=new JSZip();const rows=tableData.map((r,i)=>({'م':i+1,'رقم النقطة':r.pointName,'نوع العنصر':r.elementType,'Latitude':r.latitude,'Longitude':r.longitude,'دقة GPS (m)':r.accuracy,'ارتفاع GPS (m)':r.gpsAltitude,'عمق المطبق (m)':r.manholeDepth,'عمق وش الماسورة (m)':r.pipeCrownDepth,'قطر الماسورة (mm)':r.pipeDiameter,'اتجاه الخط':r.flowDirection,'اسم ملف الصورة':r.photoFileName||'','التاريخ والوقت':formatDate(r.datetime),'ملاحظات':r.notes}));
- const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Survey Points');zip.file('HydroGIS_Survey.xlsx',XLSX.write(wb,{bookType:'xlsx',type:'array'}));
- const folder=zip.folder('Photos');let n=0;tableData.forEach((r,i)=>{if(r.photoData){const fn=r.photoFileName||('MH_'+sanitizeFileName(r.pointName||String(i+1))+'.jpg');folder.file(fn,dataURLToBlob(r.photoData));n++}});
- zip.file('README.txt','HydroGIS Utility\n\nHydroGIS_Survey.xlsx = بيانات الرفع\nPhotos/ = صور المناهل\nاسم ملف الصورة في Excel يطابق الملف داخل مجلد Photos\nعدد النقاط: '+tableData.length+'\nعدد الصور: '+n);
- const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='HydroGIS_Project_'+new Date().toISOString().slice(0,10)+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)
+  if(!tableData.length){alert('لا توجد نقاط لتصديرها.');return}
+  if(typeof JSZip==='undefined'){alert('تعذر تحميل أداة ZIP. تحقق من اتصال الإنترنت.');return}
+  
+  const zip=new JSZip();
+  const rows=[];
+  const photosFolder=zip.folder('Photos');
+  let totalPhotosCount = 0;
+
+  tableData.forEach((r,i)=>{
+    const photosList = r.photos && r.photos.length ? r.photos : (r.photoData ? [{data: r.photoData, name: r.photoFileName || 'photo.jpg'}] : []);
+    const photoNames = [];
+
+    photosList.forEach((p, pIdx)=>{
+      if(p.data){
+        totalPhotosCount++;
+        let safePointName = sanitizeFileName(r.pointName || String(i+1));
+        let fileName = p.name || (safePointName + '_' + (pIdx + 1) + '.jpg');
+        // لمنع تكرار أسماء الملفات داخل المجلد العام
+        fileName = safePointName + '_' + (pIdx + 1) + '_' + fileName.replace(/^[a-zA-Z0-9_-]+_/, '');
+        photosFolder.file(fileName, dataURLToBlob(p.data));
+        photoNames.push(fileName);
+      }
+    });
+
+    rows.push({
+      'م': i+1,
+      'رقم النقطة': r.pointName,
+      'نوع العنصر': r.elementType,
+      'Latitude': r.latitude,
+      'Longitude': r.longitude,
+      'دقة GPS (m)': r.accuracy,
+      'ارتفاع GPS (m)': r.gpsAltitude,
+      'عمق المطبق (m)': r.manholeDepth,
+      'عمق وش الماسورة (m)': r.pipeCrownDepth,
+      'قطر الماسورة (mm)': r.pipeDiameter,
+      'اتجاه الخط': r.flowDirection,
+      'أسماء ملفات الصور': photoNames.join(' , '),
+      'التاريخ والوقت': formatDate(r.datetime),
+      'ملاحظات': r.notes
+    });
+  });
+
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Survey Points');
+  zip.file('HydroGIS_Survey.xlsx',XLSX.write(wb,{bookType:'xlsx',type:'array'}));
+  
+  zip.file('README.txt','HydroGIS Utility - Project Export\n\nHydroGIS_Survey.xlsx = بيانات الرفع المساحي لشبكات الصرف\nPhotos/ = مجلد يضم كافة الصور الملتقطة للمناهل (عدة صور لكل مطبق)\nإجمالي النقاط: '+tableData.length+'\nإجمالي الصور: '+totalPhotosCount);
+
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='HydroGIS_Project_'+new Date().toISOString().slice(0,10)+'.zip';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
 
 function exportToExcel(){
   if(!tableData.length){alert('لا توجد نقاط لتصديرها.');return}
-  const rows=tableData.map((r,i)=>({
-    'م':i+1,
-    'رقم النقطة':r.pointName,
-    'نوع العنصر':r.elementType,
-    'Latitude':r.latitude,
-    'Longitude':r.longitude,
-    'دقة GPS (m)':r.accuracy,
-    'ارتفاع GPS (m)':r.gpsAltitude,
-    'عمق المطبق (m)':r.manholeDepth,
-    'عمق وش الماسورة (m)':r.pipeCrownDepth,
-    'قطر الماسورة (mm)':r.pipeDiameter,
-    'اتجاه الخط':r.flowDirection,
-    'اسم ملف الصورة':r.photoFileName||'',
-    'التاريخ والوقت':formatDate(r.datetime),
-    'ملاحظات':r.notes
-  }));
+  const rows=tableData.map((r,i)=>{
+    const photosList = r.photos && r.photos.length ? r.photos : (r.photoData ? [{data: r.photoData, name: r.photoFileName}] : []);
+    return {
+      'م':i+1,
+      'رقم النقطة':r.pointName,
+      'نوع العنصر':r.elementType,
+      'Latitude':r.latitude,
+      'Longitude':r.longitude,
+      'دقة GPS (m)':r.accuracy,
+      'ارتفاع GPS (m)':r.gpsAltitude,
+      'عمق المطبق (m)':r.manholeDepth,
+      'عمق وش الماسورة (m)':r.pipeCrownDepth,
+      'قطر الماسورة (mm)':r.pipeDiameter,
+      'اتجاه الخط':r.flowDirection,
+      'أسماء ملفات الصور': photosList.map(p=>p.name).join(' , ') || '',
+      'التاريخ والوقت':formatDate(r.datetime),
+      'ملاحظات':r.notes
+    };
+  });
   const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[
-    {wch:6},{wch:18},{wch:18},{wch:14},{wch:14},{wch:14},{wch:15},
-    {wch:18},{wch:21},{wch:18},{wch:15},{wch:32},{wch:22},{wch:28}
-  ];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Survey Points');
-  const info=XLSX.utils.json_to_sheet([
-    {Field:'Coordinate System',Value:'WGS84 / EPSG:4326'},
-    {Field:'Elevation',Value:'تم إلغاء ارتفاع سطح الأرض من التطبيق'},
-    {Field:'GPS Save Threshold',Value:'<= 15 m'},
-    {Field:'Record Count',Value:tableData.length}
-  ]);
-  XLSX.utils.book_append_sheet(wb,info,'Metadata');
   XLSX.writeFile(wb,'HydroGIS_Survey_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 
 function handleGPSError(error){
   let msg='تعذر الحصول على الموقع.';
-  if(error?.code===1)msg='تم رفض إذن الموقع. فعّل Location/GPS من إعدادات المتصفح أو الهاتف.';
+  if(error?.code===1)msg='تم رفض إذن الموقع. فعّل Location/GPS من إعدادات الهاتف.';
   else if(error?.code===2)msg='تعذر تحديد الموقع حاليًا. تأكد من تفعيل GPS وأنك في مكان مفتوح.';
-  else if(error?.code===3)msg='انتهت مهلة قراءة GPS. سيستمر التطبيق في محاولة تحسين الموقع.';
+  else if(error?.code===3)msg='انتهت مهلة قراءة GPS. سيستمر التطبيق في المحاولة.';
   setGPSStatus('⚠️ '+msg,'bad');mapStatus(false);$('locationBtn').disabled=false;$('locationBtn').textContent='📍 إعادة تحديد الموقع';
 }
 
