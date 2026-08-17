@@ -139,10 +139,10 @@ const STORAGE_KEY = 'hydrogis_manholes_data_v4';
 
 let map, userMarker=null, accuracyCircle=null, gpsWatchId=null;
 let gpsActive=false, gpsSession=0, firstFix=false;
-let latestPosition=null, saveCandidatePosition=null;
+let latestPosition=null, saveCandidatePosition=null, bestPosition=null;
 
 let tableData=[]; let editingIndex=-1;
-let currentPhotos = []; // مصفوفة لتخزين الصور المؤقتة للنقطة الحالية [{data, name, mime}]
+let currentPhotos = []; 
 const CACHED_MAX_AGE = 30000;
 
 function $(id){return document.getElementById(id)}
@@ -164,7 +164,7 @@ function mapStatus(show,text='📡 جاري تحديد الموقع...'){$('mapS
 function startGPS(){
   if(!navigator.geolocation){alert('هذا الجهاز أو المتصفح لا يدعم خدمة تحديد الموقع.');return}
   if(gpsActive){setGPSStatus('📡 GPS يعمل ويتم تحسين الموقع باستمرار','good');return}
-  gpsSession++; const session=gpsSession; gpsActive=true; firstFix=false; saveCandidatePosition=null;
+  gpsSession++; const session=gpsSession; gpsActive=true; firstFix=false; saveCandidatePosition=null; bestPosition=null;
   $('locationBtn').disabled=true; $('locationBtn').textContent='📡 تحديد سريع...'; mapStatus(true,'📡 البحث السريع عن موقعك...');
   setGPSStatus('⚡ نحاول استخدام آخر موقع معروف فورًا، ثم نطلب GPS أدق...','waiting');
 
@@ -190,7 +190,7 @@ function startHighAccuracyWatch(session){
 
 function refreshGPS(){
   if(gpsWatchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null}
-  gpsActive=false; firstFix=false; latestPosition=null; saveCandidatePosition=null;
+  gpsActive=false; firstFix=false; latestPosition=null; saveCandidatePosition=null; bestPosition=null;
   startGPS();
 }
 
@@ -198,17 +198,38 @@ function processGPSPosition(position,isFirst=false){
   if(!position?.coords)return;
   const c=position.coords, lat=num(c.latitude), lng=num(c.longitude), accuracy=num(c.accuracy), altitude=num(c.altitude);
   if(lat===null||lng===null||accuracy===null)return;
-  if(accuracy>MAX_DISPLAY_ACCURACY){setGPSStatus('📡 GPS يعمل — الدقة الحالية '+fmt(accuracy,1)+' م','waiting');return}
+  
+  if(accuracy>MAX_DISPLAY_ACCURACY){setGPSStatus('📡 GPS يعمل — الدقة الحالية ضعيفة '+fmt(accuracy,1)+' م','waiting');return}
   latestPosition=position;
-  if(accuracy<=MAX_SAVE_ACCURACY) saveCandidatePosition=position;
-  updateMap(lat,lng,accuracy);
-  $('gpsLat').textContent=lat.toFixed(7); $('gpsLng').textContent=lng.toFixed(7);
-  $('gpsAccuracy').textContent=accuracy.toFixed(1)+' m';
-  $('gpsAltitude').textContent=altitude===null?'غير متاح':altitude.toFixed(1)+' m';
-  if(!firstFix){firstFix=true;map.setView([lat,lng],19,{animate:true});mapStatus(false)}
-  if(accuracy<=10)setGPSStatus('✅ دقة ممتازة — '+accuracy.toFixed(1)+' m','good');
-  else if(accuracy<=15)setGPSStatus('✅ الموقع صالح للحفظ — '+accuracy.toFixed(1)+' m','good');
-  else setGPSStatus('📡 جاري تحسين الدقة — '+accuracy.toFixed(1)+' m','waiting');
+
+  // منطق أفضل قراءة (Best Accuracy Logic) لمنع الانحراف العشوائي للخلف
+  if(!bestPosition || accuracy<bestPosition.coords.accuracy){
+    bestPosition=position;
+    if(accuracy<=MAX_SAVE_ACCURACY) saveCandidatePosition=position;
+  } else {
+    if(accuracy<=MAX_SAVE_ACCURACY) saveCandidatePosition=position;
+  }
+
+  const activeLat=bestPosition.coords.latitude;
+  const activeLng=bestPosition.coords.longitude;
+  const activeAcc=bestPosition.coords.accuracy;
+  const activeAlt=bestPosition.coords.altitude;
+
+  updateMap(activeLat,activeLng,activeAcc);
+  $('gpsLat').textContent=activeLat.toFixed(7); 
+  $('gpsLng').textContent=activeLng.toFixed(7);
+  $('gpsAccuracy').textContent=activeAcc.toFixed(1)+' m';
+  $('gpsAltitude').textContent=activeAlt===null?'غير متاح':activeAlt.toFixed(1)+' m';
+
+  if(!firstFix){
+    firstFix=true;
+    map.setView([activeLat,activeLng],19,{animate:true});
+    mapStatus(false);
+  }
+
+  if(activeAcc<=10)setGPSStatus('✅ دقة ممتازة وثابتة — '+activeAcc.toFixed(1)+' m','good');
+  else if(activeAcc<=MAX_SAVE_ACCURACY)setGPSStatus('✅ الموقع صالح للحفظ — '+activeAcc.toFixed(1)+' m','good');
+  else setGPSStatus('📡 جاري البحث عن دقة أفضل (الحالية: '+activeAcc.toFixed(1)+' م)...','waiting');
 }
 
 function updateMap(lat,lng,accuracy){
@@ -229,7 +250,6 @@ function freshPosition(){
 
 function sanitizeFileName(name){return String(name||'').replace(/[\/:*?"<>|]/g,'_').replace(/\s+/g,'_')}
 
-// إدارة الصور المتعددة
 async function handlePhotoSelection(event){
   const files=event.target.files; if(!files || !files.length) return;
   for(let i=0; i<files.length; i++){
@@ -244,7 +264,7 @@ async function handlePhotoSelection(event){
     });
   }
   renderPhotosPreview();
-  event.target.value = ''; // إعادة تعيين الحقل ليسمح باختيار نفس الصور مرة أخرى إن أُمِر
+  event.target.value = '';
 }
 
 function readFileAsDataURL(file){
@@ -303,7 +323,7 @@ function saveRecord(){
   const rec={
     pointName:name, elementType:$('elementType').value, latitude:lat, longitude:lng, accuracy:acc, gpsAltitude:gpsAlt,
     manholeDepth:md, pipeCrownDepth:cd, pipeDiameter:dia, flowDirection:$('flowDirection').value,
-    photos: [...currentPhotos], // حفظ مصفوفة الصور كاملة
+    photos: [...currentPhotos],
     notes:$('notes').value.trim(), datetime:now.toISOString()
   };
 
@@ -327,7 +347,7 @@ function resetForm(clearGPS=false){
   ['pointName','manholeDepth','pipeCrownDepth','pipeDiameter','notes'].forEach(id=>$(id).value='');
   $('elementType').value='مطبق صرف صحي';$('flowDirection').value='غير محدد';
   currentPhotos=[]; renderPhotosPreview();
-  if(clearGPS){latestPosition=null;saveCandidatePosition=null}
+  if(clearGPS){latestPosition=null;saveCandidatePosition=null;bestPosition=null;}
 }
 
 function editRecord(i){
@@ -337,7 +357,6 @@ function editRecord(i){
   $('pipeDiameter').value=r.pipeDiameter??''; $('flowDirection').value=r.flowDirection||'غير محدد';
   $('notes').value=r.notes||'';
   
-  // استرجاع الصور الخاصة بالنقطة
   currentPhotos = r.photos ? [...r.photos] : (r.photoData ? [{data: r.photoData, name: r.photoFileName || 'photo.jpg', mime: r.photoMime || 'image/jpeg'}] : []);
   renderPhotosPreview();
 
@@ -354,7 +373,6 @@ function renderTable(){
     const cells=[i+1,r.pointName,r.elementType,fmt(r.latitude,7),fmt(r.longitude,7),fmt(r.accuracy,1),fmt(r.gpsAltitude,1),fmt(r.manholeDepth,2),fmt(r.pipeCrownDepth,2),r.pipeDiameter??'--',r.flowDirection||'غير محدد'];
     cells.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
     
-    // عمود عرض الصور المصغرة في الجدول
     const photoTd=document.createElement('td');
     photoTd.className = 'photos-cell';
     const photosList = r.photos && r.photos.length ? r.photos : (r.photoData ? [{data: r.photoData}] : []);
@@ -372,7 +390,6 @@ function renderTable(){
     }
     tr.appendChild(photoTd);
 
-    // أسماء ملفات الصور
     const namesTd=document.createElement('td');
     namesTd.textContent = photosList.map(p=>p.name).filter(Boolean).join(', ') || '—';
     tr.appendChild(namesTd);
@@ -435,7 +452,6 @@ async function exportProjectPackage(){
         totalPhotosCount++;
         let safePointName = sanitizeFileName(r.pointName || String(i+1));
         let fileName = p.name || (safePointName + '_' + (pIdx + 1) + '.jpg');
-        // لمنع تكرار أسماء الملفات داخل المجلد العام
         fileName = safePointName + '_' + (pIdx + 1) + '_' + fileName.replace(/^[a-zA-Z0-9_-]+_/, '');
         photosFolder.file(fileName, dataURLToBlob(p.data));
         photoNames.push(fileName);
