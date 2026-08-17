@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HydroGIS Utility v4.2 - الرفع المساحي لشبكات الصرف</title>
+<title>HydroGIS Utility v4.3 - الرفع المساحي لشبكات الصرف</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -43,13 +43,13 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
 <body>
 <div class="app">
 <h1>🌐 HydroGIS Utility — الرفع المساحي لشبكات الصرف</h1>
-<div class="subtitle">تسجيل المواقع باستخدام GPS • إدخال بيانات شبكة الصرف • صور متعددة للمطبق • تصدير Excel</div>
+<div class="subtitle">تسجيل المواقع باستخدام GPS فورياً • إدخال بيانات شبكة الصرف • صور متعددة • تصدير Excel</div>
 
 <div class="grid">
 <section class="card map-card">
   <div class="map-wrap">
     <div id="map"></div>
-    <div id="mapStatus" class="map-status">📡 جاري تثبيت الموقع...</div>
+    <div id="mapStatus" class="map-status">📡 جاري التقاط الموقع الفوري...</div>
   </div>
   <div class="gps" style="margin-top:10px">
     <div class="gps-title">📡 حالة GPS الحالية</div>
@@ -63,8 +63,8 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
 
 <aside class="card panel">
   <h2>📍 بيانات النقطة الجديدة</h2>
-  <button id="locationBtn" class="btn orange" onclick="startFastGPS()">📍 تحديد موقعي بسرعة</button>
-  <button class="btn gray" onclick="refreshGPS()">📍 إعادة قراءة الموقع</button>
+  <button id="locationBtn" class="btn orange" onclick="getInstantLocation()">⚡ جلب الموقع الفوري (بدون انتظار)</button>
+  <button class="btn gray" onclick="getInstantLocation()">🔄 تحديث القراءة الحالية</button>
 
   <div class="form-group"><label>رقم الصف / النقطة / المطبق *</label><input id="pointName" placeholder="مثال: MH-105"></div>
   <div class="form-group"><label>نوع العنصر</label><select id="elementType"><option value="مطبق صرف صحي">مطبق صرف صحي</option><option value="غرفة تفتيش">غرفة تفتيش</option><option value="نقطة رفع مساحي">نقطة رفع مساحي</option><option value="بداية ماسورة">بداية ماسورة</option><option value="نهاية ماسورة">نهاية ماسورة</option><option value="أخرى">أخرى</option></select></div>
@@ -96,8 +96,7 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
     <summary>⚙️ إعدادات التطبيق</summary>
     <div class="small" style="margin-top:8px">
       <b>نظام الإحداثيات:</b> WGS84 / EPSG:4326<br>
-      <b>معالجة البطء:</b> تم تفعيل التثبيت السريع للـ GPS لتقليل وقت الانتظار.<br>
-      <b>مشكلة الشاشة البيضاء:</b> تم ضبط أقصى زووم للخريطة (MaxZoom) لمنع طلب بلاطات غير موجودة.
+      <b>التحديث v4.3:</b> إلغاء الانتظار الطويل وتفعيل قراءة الفورية العاجلة (Instant GPS Fix) لمنع القفزات الخاطئة عند التحديث.
     </div>
   </details>
   <div class="small" style="margin-top:10px;text-align:center">Designed by <b>Khaled — GIS Developer</b></div>
@@ -129,9 +128,7 @@ h1{margin:2px 0 3px;text-align:center;font-size:27px}.subtitle{text-align:center
 <script>
 'use strict';
 
-const MAX_SAVE_ACCURACY = 25; // توسيع هامش القبول قليلاً لتسريع الحفظ الميداني
-const MAX_DISPLAY_ACCURACY = 100;
-const STORAGE_KEY = 'hydrogis_manholes_data_v4_2';
+const STORAGE_KEY = 'hydrogis_manholes_data_v4_3';
 
 let map, userMarker=null, accuracyCircle=null;
 let latestPosition=null;
@@ -144,12 +141,11 @@ function fmt(v,d=2){return v===null||v===undefined||!Number.isFinite(Number(v))?
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 function initMap(){
-  // تم ضبط الـ maxZoom إلى 19 لمنع اختفاء البيز ماب وظهور الشاشة البيضاء
   map = L.map('map', {zoomControl: true, maxZoom: 19, minZoom: 3}).setView([30.0444,31.2357], 13);
   
   const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
-    maxNativeZoom: 18, // يمنع الشاشة البيضاء عند التقريب الزائد عبر مطابقة أقصى زووم متاح للمزود
+    maxNativeZoom: 18,
     attribution: 'Tiles © Esri'
   });
   
@@ -168,17 +164,28 @@ function setGPSStatus(text, type='waiting'){
   $('gpsStatus').className = 'status ' + type;
 }
 
-function mapStatus(show, text='📡 جاري تحديد الموقع...'){
+function mapStatus(show, text='📡 جاري التقاط الموقع الفوري...'){
   $('mapStatus').textContent = text;
   $('mapStatus').style.display = show ? 'block' : 'none';
 }
 
-// دعم تحديد الموقع السريع والفوري بدون الحركات المزعجة والانتظار الطويل
-function startFastGPS(){
-  if(!navigator.geolocation){alert('متصفحك لا يدعم تحديد الموقع.');return}
-  mapStatus(true, '📡 جاري التقاط الموقع الفوري...');
-  setGPSStatus('⚡ جاري جلب الإحداثيات بسرعة...', 'waiting');
+// دالة جلب الموقع الفوري المحسنة (تمنع التعليق وتلغي القفزات الوهمية)
+function getInstantLocation(){
+  if(!navigator.geolocation){
+    alert('متصفحك لا يدعم تحديد الموقع.');
+    return;
+  }
+
+  mapStatus(true, '⚡ جاري تثبيت الموقع الفوري...');
+  setGPSStatus('⚡ جارٍ قراءة الـ GPS مباشرة...', 'waiting');
   $('locationBtn').disabled = true;
+
+  // إعدادات تمنع اعتماد الكاش القديم وتجبر الهاتف على أخذ القراءة الحالية دون تأخير
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 4000,       // حد أقصى 4 ثوانٍ فقط لمنع التعليق
+    maximumAge: 0        // تصفير الذاكرة المؤقتة لمنع القفزات الخاطئ عند عمل تحديث
+  };
 
   navigator.geolocation.getCurrentPosition(
     position => {
@@ -187,16 +194,23 @@ function startFastGPS(){
       processGPSPosition(position);
     },
     error => {
-      $('locationBtn').disabled = false;
-      mapStatus(false);
-      handleGPSError(error);
+      // محاولة بديلة سريعة في حال فشل القراءة عالية الدقة العميقة
+      navigator.geolocation.getCurrentPosition(
+        fallbackPosition => {
+          $('locationBtn').disabled = false;
+          mapStatus(false);
+          processGPSPosition(fallbackPosition);
+        },
+        fallbackError => {
+          $('locationBtn').disabled = false;
+          mapStatus(false);
+          handleGPSError(fallbackError);
+        },
+        { enableHighAccuracy: false, timeout: 3000, maximumAge: 5000 }
+      );
     },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
+    options
   );
-}
-
-function refreshGPS(){
-  startFastGPS();
 }
 
 function processGPSPosition(position){
@@ -214,15 +228,15 @@ function processGPSPosition(position){
   $('gpsAccuracy').textContent = accuracy.toFixed(1) + ' m';
   $('gpsAltitude').textContent = altitude === null ? 'غير متاح' : altitude.toFixed(1) + ' m';
 
-  // تحريك الخريطة مرة واحدة فقط فور جلب الإحداثيات دون اهتزاز مستمر
+  // نقل الخريطة للموقع الحالي فوراً بمستوى زووم هندسي واضح
   map.setView([lat, lng], 18, {animate: true});
 
   if(accuracy <= 15){
     setGPSStatus('✅ تم تحديد الموقع بدقة ممتازة (' + accuracy.toFixed(1) + ' م)', 'good');
-  } else if(accuracy <= 25){
-    setGPSStatus('✅ الموقع صالح ومقبول للحفظ (' + accuracy.toFixed(1) + ' م)', 'good');
+  } else if(accuracy <= 30){
+    setGPSStatus('✅ الموقع صالح للرفع المساحي (' + accuracy.toFixed(1) + ' م)', 'good');
   } else {
-    setGPSStatus('⚠️ الدقة ضعيفة نسبياً (' + accuracy.toFixed(1) + ' م) - حاول الوقوف في مكان مكشوف', 'bad');
+    setGPSStatus('⚠️ الدقة متوسطة (' + accuracy.toFixed(1) + ' م) - تأكد من وضوح الرؤية للسماء', 'bad');
   }
 }
 
@@ -232,7 +246,7 @@ function updateMap(lat, lng, accuracy){
   } else {
     userMarker.setLatLng([lat, lng]);
   }
-  userMarker.setPopupContent('<b>📍 موقع GPS</b><br>Lat: ' + lat.toFixed(7) + '<br>Lng: ' + lng.toFixed(7) + '<br>Acc: ' + accuracy.toFixed(1) + ' m');
+  userMarker.setPopupContent('<b>📍 موقع GPS الحالي</b><br>Lat: ' + lat.toFixed(7) + '<br>Lng: ' + lng.toFixed(7) + '<br>Acc: ' + accuracy.toFixed(1) + ' m');
   
   if(!accuracyCircle){
     accuracyCircle = L.circle([lat, lng], {radius: accuracy, weight: 2, fillOpacity: 0.12, color: '#2685d8'}).addTo(map);
@@ -308,7 +322,7 @@ function removePhoto(index){
 
 function saveRecord(){
   if(!latestPosition){
-    alert('⚠️ يرجى الضغط على زر «تحديد موقعي بسرعة» أولاً لجلب إحداثيات النقطة.');
+    alert('⚠️ يرجى الضغط على زر «جلب الموقع الفوري» أولاً.');
     return;
   }
   const name = $('pointName').value.trim();
@@ -334,12 +348,12 @@ function saveRecord(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tableData));
   } catch(e){
-    alert('⚠️ تعذر الحفظ لامتلاء الذاكرة المؤقتة. قم بتصدير المشروع كملف ZIP لتفريغ المساحة.');
+    alert('⚠️ تعذر الحفظ لامتلاء الذاكرة المؤقتة. قم بتصدير المشروع كملف ZIP.');
     return;
   }
   
   renderTable();
-  resetForm(false);
+  resetForm();
   setGPSStatus('✅ تم حفظ المطبق بنجاح.', 'good');
   alert('✅ تم حفظ النقطة والصور بنجاح.');
 }
@@ -464,7 +478,7 @@ function dataURLToBlob(dataUrl){
 
 async function exportProjectPackage(){
   if(!tableData.length){alert('لا توجد نقاط لتصديرها.');return}
-  if(typeof JSZip === 'undefined'){alert('تعذر تحميل مكتبة ZIP. تحقق من الإنترنت.');return}
+  if(typeof JSZip === 'undefined'){alert('تعذر تحميل مكتبة ZIP.');return}
   
   const zip = new JSZip();
   const rows = [];
@@ -508,8 +522,6 @@ async function exportProjectPackage(){
   XLSX.utils.book_append_sheet(wb, ws, 'Survey Points');
   zip.file('HydroGIS_Survey.xlsx', XLSX.write(wb, {bookType: 'xlsx', type: 'array'}));
   
-  zip.file('README.txt', 'HydroGIS Utility - Export Package\nTotal Points: ' + tableData.length + '\nTotal Photos: ' + totalPhotosCount);
-
   const blob = await zip.generateAsync({type: 'blob', compression: 'DEFLATE'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -550,9 +562,9 @@ function exportToExcel(){
 
 function handleGPSError(error){
   let msg = 'تعذر الحصول على الموقع.';
-  if(error?.code === 1) msg = 'تم رفض إذن الموقع. فعّل GPS من إعدادات الهاتف.';
-  else if(error?.code === 2) msg = 'تعذر تحديد الموقع حالياً. تأكد من وجودك في مكان مكشوف.';
-  else if(error?.code === 3) msg = 'انتهت مهلة قراءة GPS.';
+  if(error?.code === 1) msg = 'تم رفض إذن الموقع. تأكد من تفعيله في المتصفح.';
+  else if(error?.code === 2) msg = 'إشارة GPS ضعيفة. قف في مكان مكشوف.';
+  else if(error?.code === 3) msg = 'انتهت مهلة جلب الموقع.';
   setGPSStatus('⚠️ ' + msg, 'bad');
 }
 
@@ -563,8 +575,8 @@ window.addEventListener('load', () => {
     if(!Array.isArray(tableData)) tableData = [];
   }catch{tableData = []}
   renderTable();
-  // التقاط الموقع تلقائياً عند فتح الصفحة بسرعة
-  setTimeout(() => startFastGPS(), 300);
+  // التقاط مباشر فوري عند فتح الصفحة دون إبطاء
+  setTimeout(() => getInstantLocation(), 200);
 });
 </script>
 </body>
